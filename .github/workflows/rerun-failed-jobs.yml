@@ -1,0 +1,14 @@
+name: Rerun failed jobs
+
+on:
+  workflow_run:
+    workflows: "Commit Linter"
+    types:
+      - completed
+jobs:
+  lint-commits:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - run: echo "HELLO"
