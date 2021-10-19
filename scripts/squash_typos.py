@@ -52,6 +52,8 @@ def get_authors_and_emails_from_pr():
 
     authors_and_emails = [(author, mail) for author, mail in zip(authors, emails)]
 
+    print("AUTHORS AND EMAILS:",authors_and_emails)
+
     return authors_and_emails
 
 
