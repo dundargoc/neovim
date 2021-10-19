@@ -8,12 +8,11 @@ jobs:
     if: github.event.pull_request.draft == false
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
     steps:
-      - uses: actions/checkout@v2.3.1
-        with:
-          fetch-depth: 0
       - uses: rhysd/action-setup-vim@v1
         with:
           neovim: true
-      - run: gh pr checkout ${{ github.event.pull_request.number }}
+      - run: gh pr checkout "$PR_NUMBER"
       - run: nvim --clean -es +"lua require('scripts.lintcommit').main({trace=true})"
