@@ -128,7 +128,6 @@ def squash_all_commits(message_body_before):
     commit_message_coauthors = (
         "\n"
         + "\n".join([f"Co-authored-by: {i[0]} <{i[1]}>" for i in authors_and_emails])
-        + "\n"
         + message_body_before
     )
     subprocess.call(
