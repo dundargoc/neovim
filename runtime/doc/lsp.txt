@@ -553,6 +553,9 @@ buf_request_sync({bufnr}, {method}, {params}, {timeout_ms})
                     error, returns `(nil, err)` where `err` is a string
                     describing the failure reason.
 
+check_clients_closed()                        *vim.lsp.check_clients_closed()*
+                TODO: Documentation
+
 client()                                                      *vim.lsp.client*
                 LSP client object. You can get an active client object via
                 |vim.lsp.get_client_by_id()| or
@@ -641,7 +644,7 @@ get_active_clients()                            *vim.lsp.get_active_clients()*
                                           *vim.lsp.get_buffers_by_client_id()*
 get_buffers_by_client_id({client_id})
                 Parameters: ~
-                    {client_id}  client id
+                    {client_id}  number client id
 
                 Return: ~
                     list of buffer ids
@@ -651,7 +654,7 @@ get_client_by_id({client_id})                     *vim.lsp.get_client_by_id()*
                 client may not yet be fully initialized.
 
                 Parameters: ~
-                    {client_id}  client id number
+                    {client_id}  number client id
 
                 Return: ~
                     |vim.lsp.client| object, or nil
@@ -826,6 +829,8 @@ start_client({config})                                *vim.lsp.start_client()*
                                            notifications to the server by the
                                            given number in milliseconds. No
                                            debounce occurs if nil
+                                         • exit_timeout (number, default 500):
+                                           Milliseconds to wait for server to
 
                 Return: ~
                     Client id. |vim.lsp.get_client_by_id()| Note: client may

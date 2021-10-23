@@ -1343,7 +1343,15 @@ nvim_open_term({buffer}, {opts})                            *nvim_open_term()*
 
                 Parameters: ~
                     {buffer}  the buffer to use (expected to be empty)
-                    {opts}    Optional parameters. Reserved for future use.
+                    {opts}    Optional parameters.
+                              • on_input: lua callback for input sent, i e
+                                keypresses in terminal mode. Note: keypresses
+                                are sent raw as they would be to the pty
+                                master end. For instance, a carriage return is
+                                sent as a "\r", not as a "\n". |textlock|
+                                applies. It is possible to call
+                                |nvim_chan_send| directly in the callback
+                                however. ["input", term, bufnr, data]
 
                 Return: ~
                     Channel id, or 0 on error
@@ -2350,12 +2358,7 @@ nvim_buf_set_extmark({buffer}, {ns_id}, {line}, {col}, {*opts})
                                 of the array. However the 'tabstop' buffer
                                 option is still used for hard tabs. By default
                                 lines are placed below the buffer line
-                                containing the mark.              • Note: currently virtual lines are limited to
-                                one block per buffer. Thus setting a new mark
-                                disables any previous `virt_lines` decoration.
-                                However plugins should not rely on this
-                                behaviour, as this limitation is planned to be
-                                removed.
+                                containing the mark.
                               • virt_lines_above: place virtual lines above
                                 instead.
                               • virt_lines_leftcol: Place extmarks in the

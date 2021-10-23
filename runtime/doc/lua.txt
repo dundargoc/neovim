@@ -1192,7 +1192,7 @@ inspect({object}, {options})                                   *vim.inspect()*
                     https://github.com/kikito/inspect.lua
                     https://github.com/mpeterv/vinspect
 
-make_dict_accessor({scope})                         *vim.make_dict_accessor()*
+make_dict_accessor({scope}, {handle})               *vim.make_dict_accessor()*
                 TODO: Documentation
 
 notify({msg}, {log_level}, {_opts})                             *vim.notify()*
