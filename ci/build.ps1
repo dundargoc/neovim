@@ -77,16 +77,18 @@ if ($compiler -eq 'MINGW') {
 }
 elseif ($compiler -eq 'MSVC') {
   $cmakeGeneratorArgs = '/verbosity:normal'
-  if ($bits -eq 32) {
-    $cmakeGenerator = 'Visual Studio 15 2017'
-  }
-  elseif ($bits -eq 64) {
-    $cmakeGenerator = 'Visual Studio 15 2017 Win64'
-  }
+  $cmakeGenerator = 'Visual Studio 16 2019'
 }
 
 if (-not $NoTests) {
-  python -m ensurepip
+  # Setup python (use AppVeyor system python)
+
+  # Disambiguate python3, if needed
+  if (-not (Test-Path -Path C:\hostedtoolcache\windows\Python\3.7.9\x64\python3.exe) ) {
+    move C:\hostedtoolcache\windows\Python\3.7.9\x64\python.exe C:\hostedtoolcache\windows\Python\3.7.9\x64\python3.exe
+  }
+  $env:PATH = "C:\hostedtoolcache\windows\Python\2.7.18\x64;C:\hostedtoolcache\windows\Python\3.7.9\x64;$env:PATH"
+
   python -m pip install pynvim ; exitIfFailed
   # Sanity check
   python  -c "import pynvim; print(str(pynvim))" ; exitIfFailed
@@ -101,7 +103,7 @@ if (-not $NoTests) {
 
 if ($compiler -eq 'MSVC') {
   # Required for LuaRocks (https://github.com/luarocks/luarocks/issues/1039#issuecomment-507296940).
-  $env:VCINSTALLDIR = "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.16.27023/"
+  $env:VCINSTALLDIR = "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/MSVC/16.11.31729/"
 }
 
 function convertToCmakeArgs($vars) {
@@ -109,14 +111,30 @@ function convertToCmakeArgs($vars) {
 }
 
 cd $env:DEPS_BUILD_DIR
-cmake -G $cmakeGenerator $(convertToCmakeArgs($depsCmakeVars)) "$buildDir/third-party/" ; exitIfFailed
+if ($compiler -eq 'MSVC') {
+  if ($bits -eq 32) {
+    cmake -G $cmakeGenerator -A Win32 $(convertToCmakeArgs($depsCmakeVars)) "$buildDir/third-party/" ; exitIfFailed
+  } else {
+    cmake -G $cmakeGenerator -A x64 $(convertToCmakeArgs($depsCmakeVars)) "$buildDir/third-party/" ; exitIfFailed
+  }
+} else {
+  cmake -G $cmakeGenerator $(convertToCmakeArgs($depsCmakeVars)) "$buildDir/third-party/" ; exitIfFailed
+}
 cmake --build . --config $cmakeBuildType -- $cmakeGeneratorArgs ; exitIfFailed
 cd $buildDir
 
 # Build Neovim
 mkdir build
 cd build
-cmake -G $cmakeGenerator $(convertToCmakeArgs($nvimCmakeVars)) .. ; exitIfFailed
+if ($compiler -eq 'MSVC') {
+  if ($bits -eq 32) {
+    cmake -G $cmakeGenerator -A Win32 $(convertToCmakeArgs($nvimCmakeVars)) .. ; exitIfFailed
+  } else {
+    cmake -G $cmakeGenerator -A x64 $(convertToCmakeArgs($nvimCmakeVars)) .. ; exitIfFailed
+  }
+} else {
+  cmake -G $cmakeGenerator $(convertToCmakeArgs($nvimCmakeVars)) .. ; exitIfFailed
+}
 cmake --build . --config $cmakeBuildType -- $cmakeGeneratorArgs ; exitIfFailed
 .\bin\nvim --version ; exitIfFailed
 
