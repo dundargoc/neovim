@@ -40,7 +40,7 @@ jobs:
             cmake: minimum_required
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 45
-    if: github.event.pull_request.draft == false
+    if: github.event.pull_request.draft == false || ${{ matrix.flavor }} == "functionaltest-lua"
     env:
       CC: ${{ matrix.cc }}
       CI_OS_NAME: ${{ matrix.os }}
