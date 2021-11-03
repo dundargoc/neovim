@@ -573,6 +573,9 @@ buf_request_sync({bufnr}, {method}, {params}, {timeout_ms})
                     error, returns `(nil, err)` where `err` is a string
                     describing the failure reason.
 
+check_clients_closed()                        *vim.lsp.check_clients_closed()*
+                TODO: Documentation
+
 client()                                                      *vim.lsp.client*
                 LSP client object. You can get an active client object via
                 |vim.lsp.get_client_by_id()| or
@@ -628,11 +631,6 @@ client()                                                      *vim.lsp.client*
                     server.
                   • {handlers} (table): The handlers used by the client as
                     described in |lsp-handler|.
-                  • {requests} (table): The current pending requests in flight
-                    to the server. Entries are key-value pairs with the key
-                    being the request ID while the value is a table with `type`,
-                    `bufnr`, and `method` key-value pairs. `type` is either "pending"
-                    for an active request, or "cancel" for a cancel request.
                   • {config} (table): copy of the table that was passed by the
                     user to |vim.lsp.start_client()|.
                   • {server_capabilities} (table): Response from the server
@@ -657,6 +655,19 @@ flush({client})                                              *vim.lsp.flush()*
 for_each_buffer_client({bufnr}, {fn})
                 TODO: Documentation
 
+formatexpr({opts})                                      *vim.lsp.formatexpr()*
+                Provides an interface between the built-in client and a
+                `formatexpr` function.
+
+                Currently only supports a single client. This can be set via `setlocal formatexpr=v:lua.vim.lsp.formatexpr()` but will typically or in `on_attach` via vim.api.nvim_buf_set_option(bufnr, 'formatexpr , 'v:lua.vim.lsp.formatexpr(#{timeout_ms:250})')`.
+
+                Parameters: ~
+                    {opts}  table options for customizing the formatting
+                            expression which takes the following optional
+                            keys:
+                            • timeout_ms (default 500ms). The timeout period
+                              for the formatting request.
+
 get_active_clients()                            *vim.lsp.get_active_clients()*
                 Gets all active clients.
 
@@ -666,7 +677,7 @@ get_active_clients()                            *vim.lsp.get_active_clients()*
                                           *vim.lsp.get_buffers_by_client_id()*
 get_buffers_by_client_id({client_id})
                 Parameters: ~
-                    {client_id}  client id
+                    {client_id}  number client id
 
                 Return: ~
                     list of buffer ids
@@ -676,7 +687,7 @@ get_client_by_id({client_id})                     *vim.lsp.get_client_by_id()*
                 client may not yet be fully initialized.
 
                 Parameters: ~
-                    {client_id}  client id number
+                    {client_id}  number client id
 
                 Return: ~
                     |vim.lsp.client| object, or nil
@@ -776,6 +787,15 @@ start_client({config})                                *vim.lsp.start_client()*
                                          language server if requested via
                                          `workspace/configuration` . Keys are
                                          case-sensitive.
+                    {commands}           table Table that maps string of
+                                         clientside commands to user-defined
+                                         functions. Commands passed to
+                                         start_client take precedence over the
+                                         global command registry. Each key
+                                         must be a unique comand name, and the
+                                         value is a function which is called
+                                         if any LSP action (code action, code
+                                         lenses, ...) triggers the command.
                     {init_options}       Values to pass in the initialization
                                          request as `initializationOptions` .
                                          See `initialize` in the LSP spec.
@@ -851,6 +871,8 @@ start_client({config})                                *vim.lsp.start_client()*
                                            notifications to the server by the
                                            given number in milliseconds. No
                                            debounce occurs if nil
+                                         • exit_timeout (number, default 500):
+                                           Milliseconds to wait for server to
 
                 Return: ~
                     Client id. |vim.lsp.get_client_by_id()| Note: client may
@@ -1799,14 +1821,19 @@ notify({method}, {params})                              *vim.lsp.rpc.notify()*
                     (bool) `true` if notification could be sent, `false` if
                     not
 
-request({method}, {params}, {callback})                *vim.lsp.rpc.request()*
+                                                       *vim.lsp.rpc.request()*
+request({method}, {params}, {callback}, {notify_reply_callback})
                 Sends a request to the LSP server and runs {callback} upon
                 response.
 
                 Parameters: ~
-                    {method}    (string) The invoked LSP method
-                    {params}    (table) Parameters for the invoked LSP method
-                    {callback}  (function) Callback to invoke
+                    {method}                 (string) The invoked LSP method
+                    {params}                 (table) Parameters for the
+                                             invoked LSP method
+                    {callback}               (function) Callback to invoke
+                    {notify_reply_callback}  (function) Callback to invoke as
+                                             soon as a request is no longer
+                                             pending
 
                 Return: ~
                     (bool, number) `(true, message_id)` if request could be
