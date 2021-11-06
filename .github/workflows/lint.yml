@@ -1,8 +1,9 @@
-name: "Commit Linter"
+name: "Linter"
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
 jobs:
+
   lint-commits:
     runs-on: ubuntu-latest
     if: github.event.pull_request.draft == false
@@ -17,3 +18,17 @@ jobs:
         with:
           neovim: true
       - run: nvim --clean -es +"lua require('scripts.lintcommit').main({trace=true})"
+
+  lint-gen-doc:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v2.4.0
+      - uses: actions/setup-python@v2.2.2
+
+      - run: scripts/gen_vimdoc.py
+
+      - name: Check if any files have changed
+        run: git diff-index --quiet HEAD
