@@ -1,0 +1,45 @@
+name: "Linter"
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+jobs:
+
+  commits:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v2.3.1
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: rhysd/action-setup-vim@v1
+        with:
+          neovim: true
+      - run: nvim --clean -es +"lua require('scripts.lintcommit').main({trace=true})"
+
+  gen-vimdoc:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v2.4.0
+
+      - name: Install apt packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y doxygen
+
+      - uses: actions/setup-python@v2.2.2
+
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install msgpack
+
+      - run: scripts/gen_vimdoc.py
+
+      - name: Check if any files have changed
+        run: git diff-index --quiet HEAD
