@@ -32,6 +32,8 @@ jobs:
           brew install doxygen
 
       - uses: actions/setup-python@v2.2.2
+        with:
+          python-version: '3.9.7'
 
       - name: Install Python Dependencies
         run: |
