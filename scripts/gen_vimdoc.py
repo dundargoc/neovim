@@ -49,6 +49,7 @@ import subprocess
 import collections
 import msgpack
 import logging
+from pathlib import Path
 
 from xml.dom import minidom
 
@@ -967,6 +968,7 @@ def main(config, args):
 
     Doxygen is called and configured through stdin.
     """
+    tmp_config = Path(os.path.join(base_dir, "tmp_dox"))
     for target in CONFIG:
         if args.target is not None and target != args.target:
             continue
@@ -979,23 +981,10 @@ def main(config, args):
         output_dir = out_dir.format(target=target)
         log.info("Generating documentation for %s in folder %s",
                  target, output_dir)
-        debug = args.log_level >= logging.DEBUG
-        p = subprocess.Popen(
-                ['doxygen', '-'],
-                stdin=subprocess.PIPE,
-                # silence warnings
-                # runtime/lua/vim/lsp.lua:209: warning: argument 'foo' not found
-                stderr=(subprocess.STDOUT if debug else subprocess.DEVNULL))
-        p.communicate(
-            config.format(
-                input=CONFIG[target]['files'],
-                output=output_dir,
-                filter=filter_cmd,
-                file_patterns=CONFIG[target]['file_patterns'])
-            .encode('utf8')
-        )
-        if p.returncode:
-            sys.exit(p.returncode)
+
+        config_text = config.format(input=CONFIG[target]['files'], output=output_dir, filter=filter_cmd, file_patterns=CONFIG[target]['file_patterns']).encode('utf8')
+        tmp_config.write_bytes(config_text)
+        subprocess.run(["doxygen", tmp_config], check=True)
 
         fn_map_full = {}  # Collects all functions as each module is processed.
         sections = {}
@@ -1113,6 +1102,9 @@ def main(config, args):
 
         if not args.keep_tmpfiles:
             shutil.rmtree(output_dir)
+    
+    if tmp_config.exists():
+        tmp_config.unlink()
 
     msg_report()
 
