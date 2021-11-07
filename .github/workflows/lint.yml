@@ -27,6 +27,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2.4.0
 
+      - run: apt-cache policy doxygen
+
       - name: Install apt packages
         run: |
           sudo apt-get update
