@@ -24,6 +24,9 @@ jobs:
     if: github.event.pull_request.draft == false
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    strategy:
+      matrix:
+        python-version: ['3.5', '3.6', '3.7', '3.8', '3.9', '3.10']
     steps:
       - uses: actions/checkout@v2.4.0
 
@@ -33,6 +36,8 @@ jobs:
           sudo apt-get install -y doxygen
 
       - uses: actions/setup-python@v2.2.2
+        with:
+          python-version: ${{ matrix.python-version }}
 
       - name: Install Python Dependencies
         run: |
