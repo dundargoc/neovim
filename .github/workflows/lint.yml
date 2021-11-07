@@ -20,17 +20,20 @@ jobs:
       - run: nvim --clean -es +"lua require('scripts.lintcommit').main({trace=true})"
 
   gen-vimdoc:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     if: github.event.pull_request.draft == false
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v2.4.0
 
-      - name: Install apt packages
+      - name: Install brew packages
         run: |
-          sudo apt-get update
-          sudo apt-get install -y doxygen
+          # Workaround brew issues
+          rm -f /usr/local/bin/2to3
+          brew update >/dev/null
+          brew upgrade
+          brew install doxygen
 
       - uses: actions/setup-python@v2.2.2
 
