@@ -38,7 +38,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install msgpack
 
-      - run: scripts/gen_vimdoc.py -l DEBUG
+      - run: python -u scripts/gen_vimdoc.py -l DEBUG
 
       - name: Check if any files have changed
         run: git diff-index --quiet HEAD
