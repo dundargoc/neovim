@@ -29,10 +29,6 @@ jobs:
 
       - name: Install brew packages
         run: |
-          # Workaround brew issues
-          rm -f /usr/local/bin/2to3
-          brew update >/dev/null
-          brew upgrade doxygen
           brew install doxygen
 
       - uses: actions/setup-python@v2.2.2
