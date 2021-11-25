@@ -470,7 +470,7 @@ get_namespace({namespace})                    *vim.diagnostic.get_namespace()*
                 Get namespace metadata.
 
                 Parameters: ~
-                    {ns}  number Diagnostic namespace
+                    {namespace}  number Diagnostic namespace
 
                 Return: ~
                     table Namespace metadata
