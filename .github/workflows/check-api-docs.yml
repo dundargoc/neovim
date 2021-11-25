@@ -1,0 +1,29 @@
+name: Check api docs
+
+on: pull_request_target
+
+jobs:
+  check-api-docs:
+    runs-on: ubuntu-20.04
+
+    permissions:
+      contents: write
+      pull-requests: write
+
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y doxygen python3 python3-msgpack luajit
+
+    - uses: actions/checkout@v2
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
+
+    - run: scripts/gen_vimdoc.py
+
+    - run: |
+        git diff-index --exit-code --ignore-submodules HEAD
