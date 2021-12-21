@@ -102,8 +102,13 @@ if (-not $NoTests) {
 }
 
 if ($compiler -eq 'MSVC') {
-  # Required for LuaRocks (https://github.com/luarocks/luarocks/issues/1039#issuecomment-507296940).
-  $env:VCINSTALLDIR = "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/MSVC/16.11.31729/"
+  $installationPath = vswhere.exe -latest -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+  if ($installationPath -and (test-path "$installationPath\Common7\Tools\vsdevcmd.bat")) {
+    & "${env:COMSPEC}" /s /c "`"$installationPath\Common7\Tools\vsdevcmd.bat`" -arch=x${bits} -no_logo && set" | foreach-object {
+      $name, $value = $_ -split '=', 2
+      set-content env:\"$name" $value
+    }
+  }
 }
 
 function convertToCmakeArgs($vars) {
