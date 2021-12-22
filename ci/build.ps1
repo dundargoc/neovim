@@ -80,6 +80,16 @@ elseif ($compiler -eq 'MSVC') {
   $cmakeGenerator = 'Visual Studio 16 2019'
 }
 
+if ($compiler -eq 'MSVC') {
+  $installationPath = vswhere.exe -latest -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+  if ($installationPath -and (test-path "$installationPath\Common7\Tools\vsdevcmd.bat")) {
+    & "${env:COMSPEC}" /s /c "`"$installationPath\Common7\Tools\vsdevcmd.bat`" -arch=x${bits} -no_logo && set" | foreach-object {
+      $name, $value = $_ -split '=', 2
+      set-content env:\"$name" $value
+    }
+  }
+}
+
 if (-not $NoTests) {
   python -m ensurepip
   python -m pip install pynvim; exitIfFailed
@@ -92,16 +102,6 @@ if (-not $NoTests) {
   npm.cmd install -g neovim
   Get-Command -CommandType Application neovim-node-host.cmd
   npm.cmd link neovim
-}
-
-if ($compiler -eq 'MSVC') {
-  $installationPath = vswhere.exe -latest -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
-  if ($installationPath -and (test-path "$installationPath\Common7\Tools\vsdevcmd.bat")) {
-    & "${env:COMSPEC}" /s /c "`"$installationPath\Common7\Tools\vsdevcmd.bat`" -arch=x${bits} -no_logo && set" | foreach-object {
-      $name, $value = $_ -split '=', 2
-      set-content env:\"$name" $value
-    }
-  }
 }
 
 function convertToCmakeArgs($vars) {
