@@ -82,7 +82,7 @@ elseif ($compiler -eq 'MSVC') {
 
 if (-not $NoTests) {
   python -m ensurepip
-  python -m pip install pynvim ; exitIfFailed
+  python -m pip install pynvim; exitIfFailed
   # Sanity check
   python  -c "import pynvim; print(str(pynvim))" ; exitIfFailed
 
