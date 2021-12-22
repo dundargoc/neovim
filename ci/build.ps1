@@ -100,13 +100,13 @@ if (-not $NoTests) {
 
   write-host "PATH=$env:PATH"
 
-  gem.cmd install --pre neovim
-  Get-Content -raw -path C:/hostedtoolcache/windows/Ruby/2.7.5/x64/lib/ruby/gems/2.7.0/extensions/x64-mingw32/2.7.0/msgpack-1.4.2/gem_make.out
-  Get-Command -CommandType Application neovim-ruby-host.bat
-
-  npm.cmd install -g neovim
-  Get-Command -CommandType Application neovim-node-host.cmd
-  npm.cmd link neovim
+#  gem.cmd install --pre neovim
+#  Get-Content -raw -path C:/hostedtoolcache/windows/Ruby/2.7.5/x64/lib/ruby/gems/2.7.0/extensions/x64-mingw32/2.7.0/msgpack-1.4.2/gem_make.out
+#  Get-Command -CommandType Application neovim-ruby-host.bat
+#
+#  npm.cmd install -g neovim
+#  Get-Command -CommandType Application neovim-node-host.cmd
+#  npm.cmd link neovim
 }
 
 function convertToCmakeArgs($vars) {
