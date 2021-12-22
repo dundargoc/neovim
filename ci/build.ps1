@@ -81,17 +81,11 @@ elseif ($compiler -eq 'MSVC') {
 }
 
 if (-not $NoTests) {
-  # Setup python (use AppVeyor system python)
+  # Setup python
 
-  # Disambiguate python3, if needed
-  if (-not (Test-Path -Path C:\hostedtoolcache\windows\Python\3.7.9\x64\python3.exe) ) {
-    move C:\hostedtoolcache\windows\Python\3.7.9\x64\python.exe C:\hostedtoolcache\windows\Python\3.7.9\x64\python3.exe
-  }
-  $env:PATH = "C:\hostedtoolcache\windows\Python\2.7.18\x64;C:\hostedtoolcache\windows\Python\3.7.9\x64;$env:PATH"
-
-  python -m pip install pynvim ; exitIfFailed
+  python3 -m pip install pynvim ; exitIfFailed
   # Sanity check
-  python  -c "import pynvim; print(str(pynvim))" ; exitIfFailed
+  python3 -c "import pynvim; print(str(pynvim))" ; exitIfFailed
 
   gem.cmd install --pre neovim
   Get-Command -CommandType Application neovim-ruby-host.bat
