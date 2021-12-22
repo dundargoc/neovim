@@ -97,6 +97,10 @@ if (-not $NoTests) {
   # Sanity check
   python3 -c "import pynvim; print(str(pynvim))" ; exitIfFailed
 
+  $env:PATH = "C:\hostedtoolcache\windows\Ruby\2.7.5\x64\bin;$env:PATH"
+
+  write-host "PATH=$env:PATH"
+
   gem.cmd install --pre neovim
   Get-Command -CommandType Application neovim-ruby-host.bat
 
