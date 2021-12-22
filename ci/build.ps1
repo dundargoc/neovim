@@ -77,7 +77,7 @@ if ($compiler -eq 'MINGW') {
 }
 elseif ($compiler -eq 'MSVC') {
   $cmakeGeneratorArgs = '/verbosity:normal'
-  $cmakeGenerator = 'Visual Studio 16 2019'
+  $cmakeGenerator = 'Visual Studio 17 2022'
 }
 
 if ($compiler -eq 'MSVC') {
