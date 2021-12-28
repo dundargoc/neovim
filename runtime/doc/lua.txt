@@ -1246,7 +1246,7 @@ notify({msg}, {log_level}, {opts})                              *vim.notify()*
                 Parameters: ~
                     {msg}        string Content of the notification to show to
                                  the user
-                    {log_level}  number|nil enum from vim.log.levels
+                    {log_level}  number|nil enum from |vim.log.levels|
                     {opts}       table|nil additional options (timeout, etc)
 
                 See also: ~
