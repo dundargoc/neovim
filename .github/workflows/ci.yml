@@ -70,7 +70,6 @@ jobs:
         if: matrix.os == 'osx'
         run: |
           # Workaround brew issues
-          rm -f /usr/local/bin/2to3
           brew update >/dev/null
           brew install automake ccache perl cpanminus ninja
 
