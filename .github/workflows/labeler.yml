@@ -47,7 +47,7 @@ jobs:
         run: echo "::set-output name=labels::$(gh pr view $PR_NUMBER --json labels --jq '.labels.[].name')"
 
       - if: contains(steps.labels.outputs.labels, 'ci')
-        run: gh pr edit $PR_NUMBER --add-reviewer jamessan || true
+        run: echo "${{ steps.labels.outputs.labels }}"
 
       - if: contains(steps.labels.outputs.labels, 'lsp')
         run: gh pr edit $PR_NUMBER --add-reviewer mjlbach,mfussenegger || true
