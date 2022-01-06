@@ -1,7 +1,7 @@
 name: "Pull Request Labeler"
 on:
   pull_request_target:
-    types: [opened, labeled]
+    types: [opened]
 jobs:
 
   triage:
@@ -44,10 +44,7 @@ jobs:
     steps:
       - name: Get labels
         id: labels
-        run: echo "::set-output name=labels::$(gh pr view $PR_NUMBER --json labels --jq '.labels.[].name')"
-
-      - if: contains(github.event.pull_request.labels.*.name, 'ci')
-        run: echo "nice"
+        run: echo "::set-output name=labels::$(gh pr view $PR_NUMBER --json labels --jq '.labels.[].name' | tr '\n' '%')"
 
       - if: contains(steps.labels.outputs.labels, 'ci')
         run: echo "${{ steps.labels.outputs.labels }}"
