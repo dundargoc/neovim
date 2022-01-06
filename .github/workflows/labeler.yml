@@ -46,6 +46,9 @@ jobs:
         id: labels
         run: echo "::set-output name=labels::$(gh pr view $PR_NUMBER --json labels --jq '.labels.[].name')"
 
+      - if: contains(github.event.pull_request.labels.*.name, 'ci')
+        run: echo "nice"
+
       - if: contains(steps.labels.outputs.labels, 'ci')
         run: echo "${{ steps.labels.outputs.labels }}"
 
