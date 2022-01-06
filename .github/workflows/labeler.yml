@@ -46,16 +46,16 @@ jobs:
         run: echo "::set-output name=labels::$(gh pr view $PR_NUMBER --json labels --jq '.labels.[].name')"
 
       - if: contains(steps.labels.outputs.labels, 'ci')
-        run: gh pr edit $PR_NUMBER --add-reviewer jamessan
+        run: gh pr edit $PR_NUMBER --add-reviewer jamessan || true
 
       - if: contains(steps.labels.outputs.labels, 'lsp')
-        run: gh pr edit $PR_NUMBER --add-reviewer mjlbach,mfussenegger
+        run: gh pr edit $PR_NUMBER --add-reviewer mjlbach,mfussenegger || true
 
       - if: contains(steps.labels.outputs.labels, 'vim-patch')
-        run: gh pr edit $PR_NUMBER --add-reviewer seandewar
+        run: gh pr edit $PR_NUMBER --add-reviewer seandewar || true
 
       - if: contains(steps.labels.outputs.labels, 'diagnostic')
-        run: gh pr edit $PR_NUMBER --add-reviewer gpanders
+        run: gh pr edit $PR_NUMBER --add-reviewer gpanders || true
 
       - if: contains(steps.labels.outputs.labels, 'treesitter')
-        run: gh pr edit $PR_NUMBER --add-reviewer bfredl
+        run: gh pr edit $PR_NUMBER --add-reviewer bfredl || true
