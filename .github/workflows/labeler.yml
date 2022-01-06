@@ -1,8 +1,9 @@
 name: "Pull Request Labeler"
 on:
   pull_request_target:
-    types: opened
+    types: [opened]
 jobs:
+
   triage:
     runs-on: ubuntu-latest
     permissions:
@@ -12,8 +13,10 @@ jobs:
     - uses: actions/labeler@main
       with:
         repo-token: "${{ secrets.GITHUB_TOKEN }}"
+
   type-scope:
     runs-on: ubuntu-latest
+    needs: ["triage"]
     permissions:
       contents: write
       pull-requests: write
@@ -25,6 +28,35 @@ jobs:
     steps:
       # Extract type and try to add it as a label
     - run: gh pr edit "$PR_NUMBER" --add-label "$(echo "$PR_TITLE" | sed -E 's|([[:alpha:]]+)(\(.*\))?!?:.*|\1|')" || true
-
       # Extract scope and try to add it as a label
     - run: gh pr edit "$PR_NUMBER" --add-label "$(echo "$PR_TITLE" | sed -E 's|[[:alpha:]]+\((.+)\)!?:.*|\1|')" || true
+
+  add-reviewer:
+    runs-on: ubuntu-latest
+    needs: ["triage", "type-scope"]
+    permissions:
+      contents: write
+      pull-requests: write
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+    steps:
+      - name: Get labels
+        id: labels
+        run: echo "::set-output name=labels::$(gh pr view $PR_NUMBER --json labels --jq '.labels.[].name')"
+
+      - if: contains(steps.labels.outputs.labels, 'ci')
+        run: gh pr edit $PR_NUMBER --add-reviewer jamessan
+
+      - if: contains(steps.labels.outputs.labels, 'lsp')
+        run: gh pr edit $PR_NUMBER --add-reviewer mjlbach,mfussenegger
+
+      - if: contains(steps.labels.outputs.labels, 'vim-patch')
+        run: gh pr edit $PR_NUMBER --add-reviewer seandewar
+
+      - if: contains(steps.labels.outputs.labels, 'diagnostic')
+        run: gh pr edit $PR_NUMBER --add-reviewer gpanders
+
+      - if: contains(steps.labels.outputs.labels, 'treesitter')
+        run: gh pr edit $PR_NUMBER --add-reviewer bfredl
