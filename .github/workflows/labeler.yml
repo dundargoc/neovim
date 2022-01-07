@@ -25,6 +25,6 @@ jobs:
       PR_TITLE: ${{ github.event.pull_request.title }}
     steps:
     - name: "False 1"
-      run: false
+      run: false || true
     - name: "False 2"
       run: false
