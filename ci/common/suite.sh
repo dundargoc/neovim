@@ -33,7 +33,7 @@ enter_suite() {
   FAILED=0
   rm -f "${END_MARKER}"
   local suite_name="$1"
-  export NVIM_TEST_CURRENT_SUITE="${NVIM_TEST_CURRENT_SUITE}/$suite_name"
+  export NVIM_TEST_CURRENT_SUITE="$suite_name"
   ci_fold "start" "$suite_name"
   set -x
 }
@@ -41,12 +41,11 @@ enter_suite() {
 exit_suite() {
   set +x
   if test $FAILED -ne 0 ; then
-    echo "Suite ${NVIM_TEST_CURRENT_SUITE} failed, summary:"
+    echo "Suite $NVIM_TEST_CURRENT_SUITE failed, summary:"
     echo "${FAIL_SUMMARY}"
   else
     ci_fold "end" ""
   fi
-  export NVIM_TEST_CURRENT_SUITE="${NVIM_TEST_CURRENT_SUITE%/*}"
   if test "$1" != "--continue" ; then
     exit $FAILED
   else
@@ -73,13 +72,8 @@ fail() {
 
 run_test() {
   local cmd="$1"
-  test $# -gt 0 && shift
-  local test_name="$1"
-  : ${test_name:=$cmd}
-  test $# -gt 0 && shift
-  if ! eval "$cmd" ; then
-    fail "${test_name}" "$@"
-  fi
+  local test_name="$2"
+  eval "$cmd" || fail "$test_name"
 }
 
 ended_successfully() {
@@ -98,4 +92,13 @@ ended_successfully() {
 end_tests() {
   touch "${END_MARKER}"
   ended_successfully
+}
+
+run_suite(){
+  local suite_name="$1"
+  local command="$2"
+
+  enter_suite "$suite_name"
+  run_test "$command" "$suite_name"
+  exit_suite '--continue'
 }
