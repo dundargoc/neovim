@@ -24,7 +24,6 @@ jobs:
       DEPS_PREFIX: ${{ format('{0}/nvim-deps/usr', github.workspace) }}
 
     strategy:
-      fail-fast: false
       matrix:
         config: [ MINGW_64-gcov, MSVC_64 ]
     name: windows (${{ matrix.config }})
