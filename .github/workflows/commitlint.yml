@@ -10,9 +10,6 @@ jobs:
     if: github.event.pull_request.draft == false
     steps:
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.sha }}
       - uses: rhysd/action-setup-vim@v1
         with:
           neovim: true
