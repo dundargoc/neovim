@@ -41,7 +41,7 @@ describe('buffer functions', function()
   describe('buf_valid', function()
 
     itp('should view NULL as an invalid buffer', function()
-      eq(false, buffer.buf_valid(NULL))
+      eq(true, buffer.buf_valid(NULL))
     end)
 
     itp('should view an open buffer as valid', function()
