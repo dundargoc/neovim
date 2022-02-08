@@ -78,10 +78,10 @@ if ($compiler -eq 'MINGW') {
 elseif ($compiler -eq 'MSVC') {
   $cmakeGeneratorArgs = '/verbosity:normal'
   if ($bits -eq 32) {
-    $cmakeGenerator = 'Visual Studio 15 2017'
+    $cmakeGenerator = 'Visual Studio 16 2019 Win32'
   }
   elseif ($bits -eq 64) {
-    $cmakeGenerator = 'Visual Studio 15 2017 Win64'
+    $cmakeGenerator = 'Visual Studio 16 2019'
   }
 }
 
