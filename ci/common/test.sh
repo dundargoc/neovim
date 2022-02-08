@@ -86,16 +86,16 @@ check_sanitizer() {
   fi
 }
 
-run_unittests() {
+run_unittests() {(
   ulimit -c unlimited || true
   if ! build_make unittest ; then
     fail 'unittests' F 'Unit tests failed'
   fi
   submit_coverage unittest
   check_core_dumps "$(command -v luajit)"
-}
+)}
 
-run_functionaltests() {
+run_functionaltests() {(
   ulimit -c unlimited || true
   if ! build_make ${FUNCTIONALTEST}; then
     fail 'functionaltests' F 'Functional tests failed'
@@ -104,9 +104,9 @@ run_functionaltests() {
   check_sanitizer "${LOG_DIR}"
   valgrind_check "${LOG_DIR}"
   check_core_dumps
-}
+)}
 
-run_oldtests() {
+run_oldtests() {(
   ulimit -c unlimited || true
   if ! make oldtest; then
     reset
@@ -116,7 +116,7 @@ run_oldtests() {
   check_sanitizer "${LOG_DIR}"
   valgrind_check "${LOG_DIR}"
   check_core_dumps
-}
+)}
 
 check_runtime_files() {(
   set +x
@@ -139,7 +139,7 @@ check_runtime_files() {(
   done
 )}
 
-install_nvim() {
+install_nvim() {(
   if ! build_make install ; then
     fail 'install' E 'make install failed'
     exit_suite
@@ -172,4 +172,4 @@ install_nvim() {
   if ! grep -q "$gpat" "${INSTALL_PREFIX}/share/nvim/runtime/$genvimsynf" ; then
     fail 'funcnames' F "It appears that $genvimsynf does not contain $gpat."
   fi
-}
+)}
