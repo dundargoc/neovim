@@ -26,7 +26,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        config: [ MINGW_64-gcov, MSVC_64 ]
+        config: [ MINGW_64-gcov ]
     name: windows (${{ matrix.config }})
     steps:
       - uses: actions/checkout@v2
