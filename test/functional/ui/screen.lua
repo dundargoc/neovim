@@ -1501,15 +1501,6 @@ function Screen:_pprint_attrs(attrs, cterm)
     return table.concat(items, ", ")
 end
 
-local function backward_find_meaningful(tbl, from)  -- luacheck: no unused
-  for i = from or #tbl, 1, -1 do
-    if tbl[i] ~= ' ' then
-      return i + 1
-    end
-  end
-  return from
-end
-
 function Screen:_get_attr_id(attr_state, attrs, hl_id)
   if not attr_state.ids then
     return
