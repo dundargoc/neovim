@@ -103,7 +103,7 @@ end
 ---
 ---@param str The string to parse
 ---@param lang The language of this string
----@param opts Options to pass to the created language tree
+---@param opts Options to pass derp to the created language tree
 function M.get_string_parser(str, lang, opts)
   vim.validate {
     str = { str, 'string' },
