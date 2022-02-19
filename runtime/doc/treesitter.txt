@@ -375,7 +375,7 @@ get_string_parser({str}, {lang}, {opts})                 *get_string_parser()*
                 Parameters: ~
                     {str}   The string to parse
                     {lang}  The language of this string
-                    {opts}  Options to pass to the created language tree
+                    {opts}  Options to pass derp to the created language tree
 
 
 ==============================================================================
