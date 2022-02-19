@@ -1,0 +1,11 @@
+name: Set up git
+description: Set up git
+author: dundargoc
+branding:
+  icon: settings
+  color: yellow
+runs:
+  using: composite
+  steps:
+    - run: "$GITHUB_ACTION_PATH/main.sh"
+      shell: bash
