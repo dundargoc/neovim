@@ -35,6 +35,9 @@ jobs:
           git config --global user.name 'marvim'
           git config --global user.email 'marvim@users.noreply.github.com'
 
+      - name: Set up git config
+        uses: ./.github/actions/setup-git-config@master
+
       - run: printf 'DOC_BRANCH=marvim/api-doc-update/%s\n' ${GITHUB_REF#refs/heads/} >> $GITHUB_ENV
 
       - name: Generate docs
