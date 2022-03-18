@@ -39,6 +39,7 @@ typedef struct {
 
 static PMap(uint64_t) connected_uis = MAP_INIT;
 
+
 void remote_ui_disconnect(uint64_t channel_id)
 {
   UI *ui = pmap_get(uint64_t)(&connected_uis, channel_id);
