@@ -3234,9 +3234,9 @@ nvim_create_autocmd({event}, {*opts})                  *nvim_create_autocmd()*
                   pattern = { "*.py", "*.pyi" }
 <
 
-                Examples values for event: >
-                  "BufPreWrite"
-                  {"CursorHold", "BufPreWrite", "BufPostWrite"}
+                Example values for event: >
+                  "BufWritePre"
+                  {"CursorHold", "BufWritePre", "BufWritePost"}
 <
 
                 Parameters: ~
