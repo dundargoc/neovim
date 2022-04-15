@@ -187,7 +187,7 @@ void do_exmode(void)
 
   exmode_active = true;
   State = NORMAL;
-  trigger_modechanged();
+  may_trigger_modechanged();
 
   // When using ":global /pat/ visual" and then "Q" we return to continue
   // the :global command.
@@ -1248,6 +1248,7 @@ static char_u *do_one_cmd(char_u **cmdlinep, int flags, cstack_T *cstack, LineGe
   const int save_msg_scroll = msg_scroll;
   cmdmod_T save_cmdmod;
   const int save_reg_executing = reg_executing;
+  const bool save_pending_end_reg_executing = pending_end_reg_executing;
   char_u *cmd;
 
   memset(&ea, 0, sizeof(ea));
@@ -2018,6 +2019,7 @@ doend:
   undo_cmdmod(&ea, save_msg_scroll);
   cmdmod = save_cmdmod;
   reg_executing = save_reg_executing;
+  pending_end_reg_executing = save_pending_end_reg_executing;
 
   if (ea.did_sandbox) {
     sandbox--;
@@ -5772,26 +5774,44 @@ static void ex_delcommand(exarg_T *eap)
 /// Split a string by unescaped whitespace (space & tab), used for f-args on Lua commands callback.
 /// Similar to uc_split_args(), but does not allocate, add quotes, add commas and is an iterator.
 ///
-/// @note  If no separator is found start = 0 and end = length - 1
-/// @param[in]  arg  String to split
-/// @param[in]  iter Iteration counter
-/// @param[out]  start Start of the split
-/// @param[out]  end End of the split
-/// @param[in]  length Length of the string
+/// @param[in]  arg String to split
+/// @param[in]  arglen Length of {arg}
+/// @param[inout] end Index of last character of previous iteration
+/// @param[out] buf Buffer to copy string into
+/// @param[out] len Length of string in {buf}
 ///
-/// @return  false if it's the last split (don't call again), true otherwise (call again).
-bool uc_split_args_iter(const char_u *arg, int iter, int *start, int *end, int length)
+/// @return true if iteration is complete, else false
+bool uc_split_args_iter(const char_u *arg, size_t arglen, size_t *end, char *buf, size_t *len)
 {
-  int pos;
-  *start = *end + (iter > 1 ? 2 : 0);  // Skip whitespace after the first split
-  for (pos = *start; pos < length - 2; pos++) {
-    if (arg[pos] != '\\' && ascii_iswhite(arg[pos + 1])) {
-      *end = pos;
-      return true;
+  if (!arglen) {
+    return true;
+  }
+
+  size_t pos = *end;
+  while (pos < arglen && ascii_iswhite(arg[pos])) {
+    pos++;
+  }
+
+  size_t l = 0;
+  for (; pos < arglen - 1; pos++) {
+    if (arg[pos] == '\\' && (arg[pos + 1] == '\\' || ascii_iswhite(arg[pos + 1]))) {
+      buf[l++] = arg[++pos];
+    } else {
+      buf[l++] = arg[pos];
+      if (ascii_iswhite(arg[pos + 1])) {
+        *end = pos + 1;
+        *len = l;
+        return false;
+      }
     }
   }
-  *end = length - 1;
-  return false;
+
+  if (pos < arglen && !ascii_iswhite(arg[pos])) {
+    buf[l++] = arg[pos];
+  }
+
+  *len = l;
+  return true;
 }
 
 /// split and quote args for <f-args>
@@ -8529,6 +8549,7 @@ bool save_current_state(save_state_T *sst)
   sst->save_finish_op = finish_op;
   sst->save_opcount = opcount;
   sst->save_reg_executing = reg_executing;
+  sst->save_pending_end_reg_executing = pending_end_reg_executing;
 
   msg_scroll = false;   // no msg scrolling in Normal mode
   restart_edit = 0;     // don't go to Insert mode
@@ -8559,6 +8580,7 @@ void restore_current_state(save_state_T *sst)
   finish_op = sst->save_finish_op;
   opcount = sst->save_opcount;
   reg_executing = sst->save_reg_executing;
+  pending_end_reg_executing = sst->save_pending_end_reg_executing;
 
   // don't reset msg_didout now
   msg_didout |= sst->save_msg_didout;

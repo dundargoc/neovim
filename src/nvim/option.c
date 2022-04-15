@@ -133,6 +133,7 @@ static int p_cin;
 static char_u *p_cink;
 static char_u *p_cino;
 static char_u *p_cinw;
+static char_u *p_cinsd;
 static char_u *p_com;
 static char_u *p_cms;
 static char_u *p_cpt;
@@ -2060,6 +2061,7 @@ void check_buf_options(buf_T *buf)
   parse_cino(buf);
   check_string_option(&buf->b_p_ft);
   check_string_option(&buf->b_p_cinw);
+  check_string_option(&buf->b_p_cinsd);
   check_string_option(&buf->b_p_cpt);
   check_string_option(&buf->b_p_cfu);
   check_string_option(&buf->b_p_ofu);
@@ -5140,42 +5142,42 @@ char *set_option_value(const char *const name, const long number, const char *co
         s = "";
       }
       return set_string_option(opt_idx, s, opt_flags);
-    } else {
-      varp = get_varp_scope(&(options[opt_idx]), opt_flags);
-      if (varp != NULL) {       // hidden option is not changed
-        if (number == 0 && string != NULL) {
-          int idx;
+    }
 
-          // Either we are given a string or we are setting option
-          // to zero.
-          for (idx = 0; string[idx] == '0'; idx++) {}
-          if (string[idx] != NUL || idx == 0) {
-            // There's another character after zeros or the string
-            // is empty.  In both cases, we are trying to set a
-            // num option using a string.
-            semsg(_("E521: Number required: &%s = '%s'"),
-                  name, string);
-            return NULL;  // do nothing as we hit an error
-          }
+    varp = get_varp_scope(&(options[opt_idx]), opt_flags);
+    if (varp != NULL) {       // hidden option is not changed
+      if (number == 0 && string != NULL) {
+        int idx;
+
+        // Either we are given a string or we are setting option
+        // to zero.
+        for (idx = 0; string[idx] == '0'; idx++) {}
+        if (string[idx] != NUL || idx == 0) {
+          // There's another character after zeros or the string
+          // is empty.  In both cases, we are trying to set a
+          // num option using a string.
+          semsg(_("E521: Number required: &%s = '%s'"),
+                name, string);
+          return NULL;  // do nothing as we hit an error
         }
-        long numval = number;
-        if (opt_flags & OPT_CLEAR) {
-          if ((int *)varp == &curbuf->b_p_ar) {
-            numval = -1;
-          } else if ((long *)varp == &curbuf->b_p_ul) {
-            numval = NO_LOCAL_UNDOLEVEL;
-          } else if ((long *)varp == &curwin->w_p_so || (long *)varp == &curwin->w_p_siso) {
-            numval = -1;
-          } else {
-            char *s = NULL;
-            (void)get_option_value(name, &numval, (char_u **)&s, OPT_GLOBAL);
-          }
-        }
-        if (flags & P_NUM) {
-          return set_num_option(opt_idx, varp, numval, NULL, 0, opt_flags);
+      }
+      long numval = number;
+      if (opt_flags & OPT_CLEAR) {
+        if ((int *)varp == &curbuf->b_p_ar) {
+          numval = -1;
+        } else if ((long *)varp == &curbuf->b_p_ul) {
+          numval = NO_LOCAL_UNDOLEVEL;
+        } else if ((long *)varp == &curwin->w_p_so || (long *)varp == &curwin->w_p_siso) {
+          numval = -1;
         } else {
-          return set_bool_option(opt_idx, varp, (int)numval, opt_flags);
+          char *s = NULL;
+          (void)get_option_value(name, &numval, (char_u **)&s, OPT_GLOBAL);
         }
+      }
+      if (flags & P_NUM) {
+        return set_num_option(opt_idx, varp, numval, NULL, 0, opt_flags);
+      } else {
+        return set_bool_option(opt_idx, varp, (int)numval, opt_flags);
       }
     }
   }
@@ -6058,6 +6060,8 @@ static char_u *get_varp(vimoption_T *p)
     return (char_u *)&(curbuf->b_p_cink);
   case PV_CINO:
     return (char_u *)&(curbuf->b_p_cino);
+  case PV_CINSD:
+    return (char_u *)&(curbuf->b_p_cinsd);
   case PV_CINW:
     return (char_u *)&(curbuf->b_p_cinw);
   case PV_COM:
@@ -6505,6 +6509,8 @@ void buf_copy_options(buf_T *buf, int flags)
       COPY_OPT_SCTX(buf, BV_CINK);
       buf->b_p_cino = vim_strsave(p_cino);
       COPY_OPT_SCTX(buf, BV_CINO);
+      buf->b_p_cinsd = vim_strsave(p_cinsd);
+      COPY_OPT_SCTX(buf, BV_CINSD);
       // Don't copy 'filetype', it must be detected
       buf->b_p_ft = empty_option;
       buf->b_p_pi = p_pi;

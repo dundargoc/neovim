@@ -1253,7 +1253,14 @@ static int old_mod_mask;    // mod_mask for ungotten character
 static int old_mouse_grid;  // mouse_grid related to old_char
 static int old_mouse_row;   // mouse_row related to old_char
 static int old_mouse_col;   // mouse_col related to old_char
+static int old_KeyStuffed;  // whether old_char was stuffed
 
+static bool can_get_old_char(void)
+{
+    // If the old character was not stuffed and characters have been added to
+    // the stuff buffer, need to first get the stuffed characters instead.
+    return old_char != -1 && (old_KeyStuffed || stuff_empty());
+}
 
 /*
  * Save all three kinds of typeahead, so that the user must type at a prompt.
@@ -1454,7 +1461,7 @@ int vgetc(void)
    * If a character was put back with vungetc, it was already processed.
    * Return it directly.
    */
-  if (old_char != -1) {
+  if (can_get_old_char()) {
     c = old_char;
     old_char = -1;
     mod_mask = old_mod_mask;
@@ -1462,8 +1469,14 @@ int vgetc(void)
     mouse_row = old_mouse_row;
     mouse_col = old_mouse_col;
   } else {
+    // number of characters recorded from the last vgetc() call
+    static size_t last_vgetc_recorded_len = 0;
+
     mod_mask = 0;
-    last_recorded_len = 0;
+
+    // last_recorded_len can be larger than last_vgetc_recorded_len
+    // if peeking records more
+    last_recorded_len -= last_vgetc_recorded_len;
 
     for (;;) {                 // this is done twice if there are modifiers
       bool did_inc = false;
@@ -1583,11 +1596,19 @@ int vgetc(void)
         c = utf_ptr2char(buf);
       }
 
-      if ((mod_mask & MOD_MASK_CTRL) && (c >= '?' && c <= '_')) {
-        c = Ctrl_chr(c);
-        mod_mask &= ~MOD_MASK_CTRL;
-        if (c == 0) {  // <C-@> is <Nul>
-          c = K_ZERO;
+      // A modifier was not used for a mapping, apply it to ASCII
+      // keys.  Shift would already have been applied.
+      if (mod_mask & MOD_MASK_CTRL) {
+        if ((c >= '`' && c <= 0x7f) || (c >= '@' && c <= '_')) {
+          c &= 0x1f;
+          mod_mask &= ~MOD_MASK_CTRL;
+          if (c == 0) {
+            c = K_ZERO;
+          }
+        } else if (c == '6') {
+          // CTRL-6 is equivalent to CTRL-^
+          c = 0x1e;
+          mod_mask &= ~MOD_MASK_CTRL;
         }
       }
 
@@ -1606,6 +1627,8 @@ int vgetc(void)
 
       break;
     }
+
+    last_vgetc_recorded_len = last_recorded_len;
   }
 
   /*
@@ -1660,7 +1683,7 @@ int plain_vgetc(void)
  */
 int vpeekc(void)
 {
-  if (old_char != -1) {
+  if (can_get_old_char()) {
     return old_char;
   }
   return vgetorpeek(false);
@@ -2052,7 +2075,9 @@ static int handle_mapping(int *keylenp, bool *timedout, int *mapdepth)
   return map_result_nomatch;
 }
 
-// unget one character (can only be done once!)
+/// unget one character (can only be done once!)
+/// If the character was stuffed, vgetc() will get it next time it is called.
+/// Otherwise vgetc() will only get it when the stuff buffer is empty.
 void vungetc(int c)
 {
   old_char = c;
@@ -2060,6 +2085,21 @@ void vungetc(int c)
   old_mouse_grid = mouse_grid;
   old_mouse_row = mouse_row;
   old_mouse_col = mouse_col;
+  old_KeyStuffed = KeyStuffed;
+}
+
+/// When peeking and not getting a character, reg_executing cannot be cleared
+/// yet, so set a flag to clear it later.
+void check_end_reg_executing(bool advance)
+{
+  if (reg_executing != 0 && (typebuf.tb_maplen == 0 || pending_end_reg_executing)) {
+    if (advance) {
+      reg_executing = 0;
+      pending_end_reg_executing = false;
+    } else {
+      pending_end_reg_executing = true;
+    }
+  }
 }
 
 /// Gets a byte:
@@ -2116,9 +2156,7 @@ static int vgetorpeek(bool advance)
 
   init_typebuf();
   start_stuff();
-  if (advance && typebuf.tb_maplen == 0) {
-    reg_executing = 0;
-  }
+  check_end_reg_executing(advance);
   do {
     // get a character: 1. from the stuffbuffer
     if (typeahead_char != 0) {
@@ -2145,6 +2183,7 @@ static int vgetorpeek(bool advance)
       // If a mapped key sequence is found we go back to the start to
       // try re-mapping.
       for (;;) {
+        check_end_reg_executing(advance);
         // os_breakcheck() is slow, don't use it too often when
         // inside a mapping.  But call it each time for typed
         // characters.

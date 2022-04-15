@@ -2541,6 +2541,41 @@ static bool close_last_window_tabpage(win_T *win, bool free_buf, tabpage_T *prev
   return true;
 }
 
+/// Close the buffer of "win" and unload it if "free_buf" is true.
+/// "abort_if_last" is passed to close_buffer(): abort closing if all other
+/// windows are closed.
+static void win_close_buffer(win_T *win, bool free_buf, bool abort_if_last)
+{
+  // Free independent synblock before the buffer is freed.
+  if (win->w_buffer != NULL) {
+    reset_synblock(win);
+  }
+
+  // When a quickfix/location list window is closed and the buffer is
+  // displayed in only one window, then unlist the buffer.
+  if (win->w_buffer != NULL && bt_quickfix(win->w_buffer)
+      && win->w_buffer->b_nwindows == 1) {
+    win->w_buffer->b_p_bl = false;
+  }
+
+  // Close the link to the buffer.
+  if (win->w_buffer != NULL) {
+    bufref_T bufref;
+    set_bufref(&bufref, curbuf);
+    win->w_closing = true;
+    close_buffer(win, win->w_buffer, free_buf ? DOBUF_UNLOAD : 0, abort_if_last, true);
+    if (win_valid_any_tab(win)) {
+      win->w_closing = false;
+    }
+
+    // Make sure curbuf is valid. It can become invalid if 'bufhidden' is
+    // "wipe".
+    if (!bufref_valid(&bufref)) {
+      curbuf = firstbuf;
+    }
+  }
+}
+
 // Close window "win".  Only works for the current tab page.
 // If "free_buf" is true related buffer may be unloaded.
 //
@@ -2679,36 +2714,7 @@ int win_close(win_T *win, bool free_buf, bool force)
     return OK;
   }
 
-  // Free independent synblock before the buffer is freed.
-  if (win->w_buffer != NULL) {
-    reset_synblock(win);
-  }
-
-  // When a quickfix/location list window is closed and the buffer is
-  // displayed in only one window, then unlist the buffer.
-  if (win->w_buffer != NULL && bt_quickfix(win->w_buffer)
-      && win->w_buffer->b_nwindows == 1) {
-    win->w_buffer->b_p_bl = false;
-  }
-
-  /*
-   * Close the link to the buffer.
-   */
-  if (win->w_buffer != NULL) {
-    bufref_T bufref;
-    set_bufref(&bufref, curbuf);
-    win->w_closing = true;
-    close_buffer(win, win->w_buffer, free_buf ? DOBUF_UNLOAD : 0, true);
-    if (win_valid_any_tab(win)) {
-      win->w_closing = false;
-    }
-
-    // Make sure curbuf is valid. It can become invalid if 'bufhidden' is
-    // "wipe".
-    if (!bufref_valid(&bufref)) {
-      curbuf = firstbuf;
-    }
-  }
+  win_close_buffer(win, free_buf, true);
 
   if (only_one_window() && win_valid(win) && win->w_buffer == NULL
       && (last_window(win) || curtab != prev_curtab
@@ -2845,7 +2851,7 @@ static void do_autocmd_winclosed(win_T *win)
   }
   recursive = true;
   char_u winid[NUMBUFLEN];
-  vim_snprintf((char *)winid, sizeof(winid), "%i", win->handle);
+  vim_snprintf((char *)winid, sizeof(winid), "%d", win->handle);
   apply_autocmds(EVENT_WINCLOSED, winid, winid, false, win->w_buffer);
   recursive = false;
 }
@@ -2879,7 +2885,7 @@ void win_close_othertab(win_T *win, int free_buf, tabpage_T *tp)
 
   if (win->w_buffer != NULL) {
     // Close the link to the buffer.
-    close_buffer(win, win->w_buffer, free_buf ? DOBUF_UNLOAD : 0, false);
+    close_buffer(win, win->w_buffer, free_buf ? DOBUF_UNLOAD : 0, false, true);
   }
 
   // Careful: Autocommands may have closed the tab page or made it the
@@ -5240,25 +5246,35 @@ void shell_new_columns(void)
   win_reconfig_floats();  // The size of floats might change
 }
 
-/// Check if "wp" has scrolled since last time it was checked
-/// @param wp the window to check
-bool win_did_scroll(win_T *wp)
+/// Trigger WinScrolled for "curwin" if needed.
+void may_trigger_winscrolled(void)
 {
-  return (curwin->w_last_topline != curwin->w_topline
-          || curwin->w_last_leftcol != curwin->w_leftcol
-          || curwin->w_last_width != curwin->w_width
-          || curwin->w_last_height != curwin->w_height);
-}
+  static bool recursive = false;
 
-/// Trigger WinScrolled autocmd
-void do_autocmd_winscrolled(win_T *wp)
-{
-  apply_autocmds(EVENT_WINSCROLLED, NULL, NULL, false, curbuf);
+  if (recursive || !has_event(EVENT_WINSCROLLED)) {
+    return;
+  }
 
-  wp->w_last_topline = wp->w_topline;
-  wp->w_last_leftcol = wp->w_leftcol;
-  wp->w_last_width = wp->w_width;
-  wp->w_last_height = wp->w_height;
+  win_T *wp = curwin;
+  if (wp->w_last_topline != wp->w_topline
+      || wp->w_last_leftcol != wp->w_leftcol
+      || wp->w_last_width != wp->w_width
+      || wp->w_last_height != wp->w_height) {
+    char_u winid[NUMBUFLEN];
+    vim_snprintf((char *)winid, sizeof(winid), "%d", wp->handle);
+
+    recursive = true;
+    apply_autocmds(EVENT_WINSCROLLED, winid, winid, false, wp->w_buffer);
+    recursive = false;
+
+    // an autocmd may close the window, "wp" may be invalid now
+    if (win_valid_any_tab(wp)) {
+      wp->w_last_topline = wp->w_topline;
+      wp->w_last_leftcol = wp->w_leftcol;
+      wp->w_last_width = wp->w_width;
+      wp->w_last_height = wp->w_height;
+    }
+  }
 }
 
 /*
@@ -5412,11 +5428,17 @@ void win_setheight_win(int height, win_T *win)
     // line, clear it.
     if (full_screen && msg_scrolled == 0 && row < cmdline_row) {
       grid_fill(&default_grid, row, cmdline_row, 0, Columns, ' ', ' ', 0);
+      if (msg_grid.chars) {
+        clear_cmdline = true;
+      }
     }
     cmdline_row = row;
+    p_ch = MAX(Rows - cmdline_row, 1);
+    curtab->tp_ch_used = p_ch;
     msg_row = row;
     msg_col = 0;
     redraw_all_later(NOT_VALID);
+    showmode();
   }
 }
 
@@ -5452,7 +5474,9 @@ static void frame_setheight(frame_T *curfrp, int height)
   if (curfrp->fr_parent == NULL) {
     // topframe: can only change the command line
     if (height > ROWS_AVAIL) {
-      height = ROWS_AVAIL;
+      // If height is greater than the available space, try to create space for the frame by
+      // reducing 'cmdheight' if possible, while making sure `cmdheight` doesn't go below 1.
+      height = MIN(ROWS_AVAIL + (p_ch - 1), height);
     }
     if (height > 0) {
       frame_new_height(curfrp, height, false, false);

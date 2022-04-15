@@ -2527,9 +2527,9 @@ int do_ecmd(int fnum, char_u *ffname, char_u *sfname, exarg_T *eap, linenr_T new
         // Close the link to the current buffer. This will set
         // oldwin->w_buffer to NULL.
         u_sync(false);
-        const bool did_decrement = close_buffer(oldwin, curbuf,
-                                                (flags & ECMD_HIDE) || curbuf->terminal ? 0 : DOBUF_UNLOAD,
-                                                false);
+        const bool did_decrement
+          = close_buffer(oldwin, curbuf, (flags & ECMD_HIDE) || curbuf->terminal ? 0 : DOBUF_UNLOAD,
+                         false, false);
 
         // Autocommands may have closed the window.
         if (win_valid(the_curwin)) {
@@ -2875,7 +2875,7 @@ int do_ecmd(int fnum, char_u *ffname, char_u *sfname, exarg_T *eap, linenr_T new
     redraw_curbuf_later(NOT_VALID);     // redraw this buffer later
   }
 
-  if (p_im) {
+  if (p_im && (State & INSERT) == 0) {
     need_start_insertmode = true;
   }
 
@@ -4313,17 +4313,20 @@ skip:
 
 #define PUSH_PREVIEW_LINES() \
   do { \
-    linenr_T match_lines = current_match.end.lnum \
-                           - current_match.start.lnum +1; \
-    if (preview_lines.subresults.size > 0) { \
-      linenr_T last = kv_last(preview_lines.subresults).end.lnum; \
-      if (last == current_match.start.lnum) { \
-        preview_lines.lines_needed += match_lines - 1; \
+    if (preview) { \
+      linenr_T match_lines = current_match.end.lnum - current_match.start.lnum + 1; \
+      if (preview_lines.subresults.size > 0) { \
+        linenr_T last = kv_last(preview_lines.subresults).end.lnum; \
+        if (last == current_match.start.lnum) { \
+          preview_lines.lines_needed += match_lines - 1; \
+        } else { \
+          preview_lines.lines_needed += match_lines; \
+        } \
+      } else { \
+        preview_lines.lines_needed += match_lines; \
       } \
-    } else { \
-      preview_lines.lines_needed += match_lines; \
+      kv_push(preview_lines.subresults, current_match); \
     } \
-    kv_push(preview_lines.subresults, current_match); \
   } while (0)
 
             // Push the match to preview_lines.
