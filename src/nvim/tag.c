@@ -1530,7 +1530,7 @@ int find_tags(char *pat, int *num_matches, char ***matchesp, int flags, int minc
           help_pri = 0;
         } else {
           help_pri = 1;
-          for (s = p_hlg; *s != NUL; s++) {
+          for (s = (char_u *)p_hlg; *s != NUL; s++) {
             if (STRNICMP(s, help_lang, 2) == 0) {
               break;
             }
@@ -1614,7 +1614,7 @@ int find_tags(char *pat, int *num_matches, char ***matchesp, int flags, int minc
           // Adjust the search file offset to the correct position
           search_info.curr_offset_used = search_info.curr_offset;
           vim_fseek(fp, search_info.curr_offset, SEEK_SET);
-          eof = vim_fgets((char_u *)lbuf, lbuf_size, fp);
+          eof = vim_fgets(lbuf, lbuf_size, fp);
           if (!eof && search_info.curr_offset != 0) {
             // The explicit cast is to work around a bug in gcc 3.4.2
             // (repeated below).
@@ -1624,12 +1624,12 @@ int find_tags(char *pat, int *num_matches, char ***matchesp, int flags, int minc
               vim_fseek(fp, search_info.low_offset, SEEK_SET);
               search_info.curr_offset = search_info.low_offset;
             }
-            eof = vim_fgets((char_u *)lbuf, lbuf_size, fp);
+            eof = vim_fgets(lbuf, lbuf_size, fp);
           }
           // skip empty and blank lines
           while (!eof && vim_isblankline(lbuf)) {
             search_info.curr_offset = vim_ftell(fp);
-            eof = vim_fgets((char_u *)lbuf, lbuf_size, fp);
+            eof = vim_fgets(lbuf, lbuf_size, fp);
           }
           if (eof) {
             // Hit end of file.  Skip backwards.
@@ -1643,7 +1643,7 @@ int find_tags(char *pat, int *num_matches, char ***matchesp, int flags, int minc
 
           // skip empty and blank lines
           do {
-            eof = vim_fgets((char_u *)lbuf, lbuf_size, fp);
+            eof = vim_fgets(lbuf, lbuf_size, fp);
           } while (!eof && vim_isblankline(lbuf));
 
           if (eof) {
@@ -2687,7 +2687,7 @@ static int jumpto_tag(const char_u *lbuf_arg, int forceit, int keep_help)
         // start search before first line
         curwin->w_cursor.lnum = 0;
       }
-      if (do_search(NULL, pbuf[0], pbuf[0], pbuf + 1, (long)1,
+      if (do_search(NULL, pbuf[0], pbuf[0], (char *)pbuf + 1, (long)1,
                     search_options, NULL)) {
         retval = OK;
       } else {
@@ -2696,7 +2696,7 @@ static int jumpto_tag(const char_u *lbuf_arg, int forceit, int keep_help)
 
         // try again, ignore case now
         p_ic = true;
-        if (!do_search(NULL, pbuf[0], pbuf[0], pbuf + 1, (long)1,
+        if (!do_search(NULL, pbuf[0], pbuf[0], (char *)pbuf + 1, (long)1,
                        search_options, NULL)) {
           // Failed to find pattern, take a guess: "^func  ("
           found = 2;
@@ -2704,11 +2704,11 @@ static int jumpto_tag(const char_u *lbuf_arg, int forceit, int keep_help)
           cc = *tagp.tagname_end;
           *tagp.tagname_end = NUL;
           snprintf((char *)pbuf, LSIZE, "^%s\\s\\*(", tagp.tagname);
-          if (!do_search(NULL, '/', '/', pbuf, (long)1, search_options, NULL)) {
+          if (!do_search(NULL, '/', '/', (char *)pbuf, (long)1, search_options, NULL)) {
             // Guess again: "^char * \<func  ("
             snprintf((char *)pbuf, LSIZE, "^\\[#a-zA-Z_]\\.\\*\\<%s\\s\\*(",
                      tagp.tagname);
-            if (!do_search(NULL, '/', '/', pbuf, (long)1,
+            if (!do_search(NULL, '/', '/', (char *)pbuf, (long)1,
                            search_options, NULL)) {
               found = 0;
             }

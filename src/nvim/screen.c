@@ -305,16 +305,16 @@ void redraw_wildmenu(expand_T *xp, int num_matches, char **matches, int match, i
 {
 #define L_MATCH(m) (showtail ? sm_gettail(matches[m], false) : matches[m])
   int row;
-  char_u *buf;
+  char *buf;
   int len;
   int clen;                     // length in screen cells
   int fillchar;
   int attr;
   int i;
   bool highlight = true;
-  char_u *selstart = NULL;
+  char *selstart = NULL;
   int selstart_col = 0;
-  char_u *selend = NULL;
+  char *selend = NULL;
   static int first_match = 0;
   bool add_left = false;
   char_u *s;
@@ -397,7 +397,7 @@ void redraw_wildmenu(expand_T *xp, int num_matches, char **matches, int match, i
              || xp->xp_context == EXPAND_MENUNAMES);
     if (emenu && menu_is_separator((char *)s)) {
       STRCPY(buf + len, transchar('|'));
-      l = (int)STRLEN(buf + len);
+      l = (int)strlen(buf + len);
       len += l;
       clen += l;
     } else {
@@ -410,7 +410,7 @@ void redraw_wildmenu(expand_T *xp, int num_matches, char **matches, int match, i
           len += l;
         } else {
           STRCPY(buf + len, transchar_byte(*s));
-          len += (int)STRLEN(buf + len);
+          len += (int)strlen(buf + len);
         }
       }
     }
@@ -467,10 +467,10 @@ void redraw_wildmenu(expand_T *xp, int num_matches, char **matches, int match, i
     ScreenGrid *grid = (wild_menu_showing == WM_SCROLLED)
                         ? &msg_grid_adj : &default_grid;
 
-    grid_puts(grid, (char *)buf, row, 0, attr);
+    grid_puts(grid, buf, row, 0, attr);
     if (selstart != NULL && highlight) {
       *selend = NUL;
-      grid_puts(grid, (char *)selstart, row, selstart_col, HL_ATTR(HLF_WM));
+      grid_puts(grid, selstart, row, selstart_col, HL_ATTR(HLF_WM));
     }
 
     grid_fill(grid, row, row + 1, clen, Columns,
@@ -932,7 +932,7 @@ void draw_tabline(void)
   int len;
   int attr_nosel = HL_ATTR(HLF_TP);
   int attr_fill = HL_ATTR(HLF_TPF);
-  char_u *p;
+  char *p;
   int room;
   int use_sep_chars = (t_colors < 8);
 
@@ -1041,16 +1041,16 @@ void draw_tabline(void)
         get_trans_bufname(cwp->w_buffer);
         shorten_dir(NameBuff);
         len = vim_strsize((char *)NameBuff);
-        p = (char_u *)NameBuff;
+        p = NameBuff;
         while (len > room) {
-          len -= ptr2cells((char *)p);
+          len -= ptr2cells(p);
           MB_PTR_ADV(p);
         }
         if (len > Columns - col - 1) {
           len = Columns - col - 1;
         }
 
-        grid_puts_len(&default_grid, (char *)p, (int)STRLEN(p), 0, col, attr);
+        grid_puts_len(&default_grid, p, (int)strlen(p), 0, col, attr);
         col += len;
       }
       grid_putchar(&default_grid, ' ', 0, col++, attr);
