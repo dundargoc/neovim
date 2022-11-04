@@ -552,7 +552,7 @@ int nlua_read_secure(lua_State *L)
     luaL_argerror(L, 1, "expected string");
   }
 
-  const char *contents = NULL;
+  char *contents = NULL;
   size_t len = 0;
   const char *path = lua_tolstring(L, 1, &len);
   if (path != NULL) {
@@ -561,7 +561,7 @@ int nlua_read_secure(lua_State *L)
 
   if (contents != NULL) {
     lua_pushlstring(L, contents, len);
-    xfree((void *)contents);
+    xfree(contents);
     return 1;
   }
 

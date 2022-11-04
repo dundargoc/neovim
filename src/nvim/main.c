@@ -1988,9 +1988,10 @@ static void source_startup_scripts(const mparm_T *const parmp)
       secure = p_secure;
 
       size_t dummy;
-      const char *init_str = read_secure(VIMRC_FILE, &dummy);
+      char *init_str = read_secure(VIMRC_FILE, &dummy);
       if (init_str) {
         do_source_str(init_str, VIMRC_FILE);
+        xfree(init_str);
       } else {
 #if defined(UNIX)
         // if ".exrc" is not owned by user set 'secure' mode
@@ -2003,6 +2004,7 @@ static void source_startup_scripts(const mparm_T *const parmp)
         init_str = read_secure(EXRC_FILE, &dummy);
         if (init_str) {
           do_source_str(init_str, EXRC_FILE);
+          xfree(init_str);
         }
       }
     }

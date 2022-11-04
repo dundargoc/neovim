@@ -1857,7 +1857,7 @@ static void cmd_source_buffer(const exarg_T *const eap)
 ///
 /// @return A pointer to file contents if the file should be trusted, or NULL
 ///         otherwise. Caller owns returned memory.
-const char *read_secure(const char *path, size_t *len)
+char *read_secure(const char *path, size_t *len)
   FUNC_ATTR_NONNULL_ALL
 {
   ssize_t fsize = 0;
