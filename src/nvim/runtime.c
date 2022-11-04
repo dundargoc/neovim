@@ -1874,9 +1874,9 @@ const char *read_secure(const char *path)
     char *line = NULL;
     size_t len = 0;
     while ((line = fgetln(trust_fp, &len)) != NULL) {
-      char *p = strsep(&line, " \n");
       char *h = strsep(&line, " \n");
-      if (p == NULL || h == NULL) {
+      char *p = strsep(&line, "\n");
+      if (h == NULL || p == NULL) {
         // Malformed line
         continue;
       }
@@ -1996,7 +1996,7 @@ const char *read_secure(const char *path)
     const char *p;
     char *h;
     map_foreach(&file_hashes, p, h, {
-      fprintf(trust_fp, "%s %s\n", p, h);
+      fprintf(trust_fp, "%s %s\n", h, p);
     })
   }
 
