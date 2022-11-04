@@ -1987,7 +1987,8 @@ static void source_startup_scripts(const mparm_T *const parmp)
 #endif
       secure = p_secure;
 
-      const char *init_str = read_secure(VIMRC_FILE);
+      size_t dummy;
+      const char *init_str = read_secure(VIMRC_FILE, &dummy);
       if (init_str) {
         do_source_str(init_str, VIMRC_FILE);
       } else {
@@ -1999,7 +2000,7 @@ static void source_startup_scripts(const mparm_T *const parmp)
           secure = 0;
         }
 #endif
-        init_str = read_secure(EXRC_FILE);
+        init_str = read_secure(EXRC_FILE, &dummy);
         if (init_str) {
           do_source_str(init_str, EXRC_FILE);
         }

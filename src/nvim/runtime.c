@@ -1851,13 +1851,16 @@ static void cmd_source_buffer(const exarg_T *const eap)
 /// of [hash, path] pairs. A path can be marked as blacklisted by using a '!'
 /// character for the hash.
 ///
-/// @param path Path to file
+/// @param path[in] Path to file
+/// @param len[out] Pointer which is populated with the length of the returned contents without the
+///                 trailing NUL byte.
 ///
 /// @return A pointer to file contents if the file should be trusted, or NULL
 ///         otherwise. Caller owns returned memory.
-const char *read_secure(const char *path)
+const char *read_secure(const char *path, size_t *len)
   FUNC_ATTR_NONNULL_ALL
 {
+  ssize_t fsize = 0;
   char *contents = NULL;
 
   // Exit early if file can't be read
@@ -1872,8 +1875,8 @@ const char *read_secure(const char *path)
   FILE *trust_fp = os_fopen(trustdb, "r");
   if (trust_fp) {
     char *line = NULL;
-    size_t len = 0;
-    while ((line = fgetln(trust_fp, &len)) != NULL) {
+    size_t llen = 0;
+    while ((line = fgetln(trust_fp, &llen)) != NULL) {
       char *h = strsep(&line, " \n");
       char *p = strsep(&line, "\n");
       if (h == NULL || p == NULL) {
@@ -1893,7 +1896,7 @@ const char *read_secure(const char *path)
   }
 
   fseek(fp, 0, SEEK_END);
-  ssize_t fsize = ftell(fp);
+  fsize = ftell(fp);
   fseek(fp, 0, SEEK_SET);
   assert(fsize >= 0);
 
@@ -2018,6 +2021,13 @@ out:
     })
   }
   pmap_destroy(cstr_t)(&file_hashes);
+
+  if (contents != NULL) {
+    // Subtract one for trailing null byte
+    *len = (size_t)fsize - 1;
+  } else {
+    *len = 0;
+  }
 
   return contents;
 }

@@ -556,11 +556,12 @@ int nlua_read_secure(lua_State *L)
   size_t len = 0;
   const char *path = lua_tolstring(L, 1, &len);
   if (path != NULL) {
-    contents = read_secure(path);
+    contents = read_secure(path, &len);
   }
 
   if (contents != NULL) {
-    lua_pushstring(L, contents);
+    lua_pushlstring(L, contents, len);
+    xfree((void *)contents);
     return 1;
   }
 
