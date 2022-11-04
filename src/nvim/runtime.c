@@ -1874,18 +1874,27 @@ const char *read_secure(const char *path, size_t *len)
   char *trustdb = stdpaths_user_state_subpath("trust", 0, false);
   FILE *trust_fp = os_fopen(trustdb, "r");
   if (trust_fp) {
-    char *line = NULL;
-    size_t llen = 0;
-    while ((line = fgetln(trust_fp, &llen)) != NULL) {
-      char *h = strsep(&line, " \n");
-      char *p = strsep(&line, "\n");
+    // Pre-allocate space for file path, 32 char hash, one space, one newline, and one null byte
+    int size = MAXPATHL + 32 + 3;
+    char *line = xcalloc((size_t)size, sizeof(char));
+    while (fgets(line, size, trust_fp) != NULL) {
+      char *s = line;
+      char *h = strsep(&s, " \n");
+      char *p = strsep(&s, "\n");
       if (h == NULL || p == NULL) {
         // Malformed line
         continue;
       }
-      (void)pmap_put(cstr_t)(&file_hashes, p, xstrdup(h));
+
+      // The trust database should not contain multiple entries for the same file, but if it does
+      // avoid making a duplicate copy of the file path (which would leak memory) and assume that
+      // the first hash read for the file is the "real" one.
+      if (!pmap_has(cstr_t)(&file_hashes, p)) {
+        (void)pmap_put(cstr_t)(&file_hashes, xstrdup(p), xstrdup(h));
+      }
     }
 
+    xfree(line);
     fclose(trust_fp);
   }
 
@@ -1970,15 +1979,29 @@ const char *read_secure(const char *path, size_t *len)
   }
   case 3: {
     // Blacklist
-    char **k = (char **)pmap_ref(cstr_t)(&file_hashes, fullpath, true);
+
+    // Only duplicate the file path if it does not already exist in the map
+    char **k = (char **)pmap_ref(cstr_t)(&file_hashes, fullpath, false);
+    if (k == NULL) {
+      k = (char **)pmap_ref(cstr_t)(&file_hashes, xstrdup(fullpath), true);
+    }
+
     *k = xstrdup("!");
+
     XFREE_CLEAR(contents);
     break;
   }
   case 4: {
     // Trust
-    char **k = (char **)pmap_ref(cstr_t)(&file_hashes, fullpath, true);
+
+    // Only duplicate the file path if it does not already exist in the map
+    char **k = (char **)pmap_ref(cstr_t)(&file_hashes, fullpath, false);
+    if (k == NULL) {
+      k = (char **)pmap_ref(cstr_t)(&file_hashes, xstrdup(fullpath), true);
+    }
+
     *k = xstrdup(hash);
+
     break;
   }
   case 5:
@@ -2018,7 +2041,7 @@ out:
     const char *p;
     char *h;
     map_foreach(&file_hashes, p, h, {
-      (void)p;
+      xfree((void *)p);
       xfree(h);
     })
   }
