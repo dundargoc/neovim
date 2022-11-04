@@ -1848,7 +1848,7 @@ static void cmd_source_buffer(const exarg_T *const eap)
 /// Read a file, prompting the user if the file should be trusted or not.
 ///
 /// Maintain a "trust database" at stdpath('state')/trust containing a sequence
-/// of [path, hash] pairs. A path can be marked as blacklisted by using a '!'
+/// of [hash, path] pairs. A path can be marked as blacklisted by using a '!'
 /// character for the hash.
 ///
 /// @param path Path to file
