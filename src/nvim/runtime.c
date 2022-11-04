@@ -1964,6 +1964,8 @@ const char *read_secure(const char *path, size_t *len)
     set_option_value_give_err("filetype", 0, "vim", OPT_LOCAL);
     set_option_value_give_err("readonly", 1, NULL, OPT_LOCAL);
     set_option_value_give_err("modifiable", 0, NULL, OPT_LOCAL);
+
+    XFREE_CLEAR(contents);
     break;
   }
   case 3: {
