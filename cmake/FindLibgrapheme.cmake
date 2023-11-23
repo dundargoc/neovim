@@ -1,0 +1,9 @@
+find_path2(LIBGRAPHEME_INCLUDE_DIR grapheme.h)
+find_library2(TREESITTER_LIBRARY NAMES libgrapheme)
+find_package_handle_standard_args(Libgrapheme DEFAULT_MSG
+  LIBGRAPHEME_LIBRARY LIBGRAPHEME_INCLUDE_DIR)
+mark_as_advanced(LIBGRAPHEME_LIBRARY LIBGRAPHEME_INCLUDE_DIR)
+
+add_library(libgrapheme INTERFACE)
+target_include_directories(libgrapheme SYSTEM BEFORE INTERFACE ${LIBGRAPHEME_INCLUDE_DIR})
+target_link_libraries(libgrapheme INTERFACE ${LIBGRAPHEME_LIBRARY})

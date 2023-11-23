@@ -1,0 +1,18 @@
+cmake_minimum_required(VERSION 3.10)
+# Can be removed once minimum version is at least 3.15
+if(POLICY CMP0092)
+  cmake_policy(SET CMP0092 NEW)
+endif()
+project(grapheme C)
+
+file(GLOB source_files src/*.c)
+file(GLOB gen_files gen/*.c)
+
+message(FATAL_ERROR ${source_files} ${gen_files})
+add_library(grapheme ${source_files} ${gen_files})
+target_compile_options(grapheme PRIVATE -w)
+
+include(GNUInstallDirs)
+install(TARGETS grapheme DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
+# vim: set ft=cmake:
