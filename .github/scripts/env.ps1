@@ -7,3 +7,4 @@ if ($installationPath -and (Test-Path "$installationPath\Common7\Tools\vsdevcmd.
     "$name=$value" >> $env:GITHUB_ENV
   }
 }
+
