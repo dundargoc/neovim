@@ -1,66 +1,71 @@
-"lsp":
-  - runtime/lua/vim/lsp.lua
-  - runtime/lua/vim/lsp/*
+lsp:
+  - changed-files:
+    - any-glob-to-any-file: [ runtime/lua/vim/lsp.lua, runtime/lua/vim/lsp/* ]
 
-"tui":
-  - src/nvim/tui/tui.*
+tui:
+  - changed-files:
+    - any-glob-to-any-file: [ src/nvim/tui/tui.* ]
 
-"treesitter":
-  - src/nvim/lua/treesitter.*
-  - runtime/lua/vim/treesitter.lua
-  - runtime/lua/vim/treesitter/*
-  - runtime/queries/**/*
+treesitter:
+  - changed-files:
+    - any-glob-to-any-file: [ src/nvim/lua/treesitter.*, runtime/lua/vim/treesitter.lua, runtime/lua/vim/treesitter/*, runtime/queries/**/* ]
 
-"diagnostic":
-  - runtime/lua/vim/diagnostic.lua
+diagnostic:
+  - changed-files:
+    - any-glob-to-any-file: [ runtime/lua/vim/diagnostic.lua ]
 
-"dependencies":
-  - cmake.deps/**/*
+dependencies:
+  - changed-files:
+    - any-glob-to-any-file: [ cmake.deps/**/* ]
 
-"spell":
-  - src/nvim/spell*
+spell:
+  - changed-files:
+    - any-glob-to-any-file: [ src/nvim/spell* ]
 
-"terminal":
-  - src/nvim/terminal.*
+terminal:
+  - changed-files:
+    - any-glob-to-any-file: [ src/nvim/terminal.* ]
 
-"column":
-  - src/nvim/sign*
+column:
+  - changed-files:
+    - any-glob-to-any-file: [ src/nvim/sign* ]
 
-"folds":
-  - src/nvim/fold*
+folds:
+  - changed-files:
+    - any-glob-to-any-file: [ src/nvim/fold* ]
 
-"mouse":
-  - src/nvim/mouse*
+mouse:
+  - changed-files:
+    - any-glob-to-any-file: [ src/nvim/mouse* ]
 
-"documentation":
-  - all: ["runtime/doc/*"]
-  - all: ["**/*.md"]
+documentation:
+  - changed-files:
+    - any-glob-to-all-files: [ runtime/doc/*, "**/*.md" ]
 
-"clipboard":
-  - runtime/autoload/provider/clipboard.vim
+clipboard:
+  - changed-files:
+    - any-glob-to-any-file: [ runtime/autoload/provider/clipboard.vim ]
 
-"diff":
-  - src/nvim/diff.*
+diff:
+  - changed-files:
+    - any-glob-to-any-file: [ src/nvim/diff.* ]
 
-"build":
-  - CMakeLists.txt
-  - "**/CMakeLists.txt"
-  - "**/Makefile"
-  - "**/*.cmake"
+build:
+  - changed-files:
+    - any-glob-to-any-file: [ CMakeLists.txt, "**/CMakeLists.txt", "**/Makefile", "**/*.cmake" ]
 
-"test":
-  - all: ["test/**/*"]
+test:
+  - changed-files:
+    - any-glob-to-all-files: [test/**/*]
 
-"ci":
-  - .github/labeler.yml
-  - .github/workflows/**/*
-  - .builds/*
-  - ci/**/*
+ci:
+  - changed-files:
+    - any-glob-to-any-file: [ .github/labeler.yml, .github/workflows/**/*, .builds/*, ci/**/* ]
 
-"filetype":
-  - runtime/lua/vim/filetype.lua
-  - runtime/lua/vim/filetype/detect.lua
+filetype:
+  - changed-files:
+    - any-glob-to-any-file: [ runtime/lua/vim/filetype.lua, runtime/lua/vim/filetype/detect.lua ]
 
-"platform:nix":
-  - contrib/flake.lock
-  - contrib/flake.nix
+platform:nix:
+  - changed-files:
+    - any-glob-to-any-file: [ contrib/flake.lock, contrib/flake.nix ]
