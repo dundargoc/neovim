@@ -1065,3 +1065,4 @@ return setmetatable(M, {
     return Iter.new(...)
   end,
 })
+
