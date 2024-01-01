@@ -368,3 +368,4 @@ function M.normalize(path, opts)
 end
 
 return M
+
