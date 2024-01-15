@@ -2235,3 +2235,9 @@ const char *__asan_default_options(void)
   return "handle_abort=1,handle_sigill=1";
 }
 #endif
+
+/// Print deprecation warning
+void deprecate(void)
+{
+  emsg("This function is deprecated");
+}
