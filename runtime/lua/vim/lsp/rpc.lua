@@ -3,8 +3,6 @@ local log = require('vim.lsp.log')
 local protocol = require('vim.lsp.protocol')
 local validate, schedule, schedule_wrap = vim.validate, vim.schedule, vim.schedule_wrap
 
-local is_win = uv.os_uname().version:find('Windows')
-
 --- Checks whether a given path exists and is a directory.
 ---@param filename string path to check
 ---@return boolean
@@ -817,7 +815,7 @@ function M.start(cmd, cmd_args, dispatchers, extra_spawn_params)
     end
   end
 
-  local detached = not is_win
+  local detached = not vim._iswin()
   if extra_spawn_params.detached ~= nil then
     detached = extra_spawn_params.detached
   end

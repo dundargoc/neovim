@@ -1,6 +1,6 @@
 local M = {}
 
-local iswin = vim.uv.os_uname().sysname == 'Windows_NT'
+local iswin = vim._iswin()
 
 --- Iterate over all the parents of the given path.
 ---

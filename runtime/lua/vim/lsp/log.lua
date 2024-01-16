@@ -28,7 +28,7 @@ do
     end
   end
 
-  local path_sep = vim.uv.os_uname().version:match('Windows') and '\\' or '/'
+  local path_sep = vim._iswin() and '\\' or '/'
   local function path_join(...)
     return table.concat(vim.tbl_flatten({ ... }), path_sep)
   end

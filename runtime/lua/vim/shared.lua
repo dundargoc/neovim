@@ -983,4 +983,10 @@ do
   end
 end
 
+---@private
+function vim._iswin()
+  local sysname = vim.uv.os_uname().sysname
+  return not not (sysname:find('windows') or sysname:find('mingw'))
+end
+
 return vim
