@@ -11,8 +11,9 @@ done
 
 os=$(uname -s)
 if [[ $os == Linux ]]; then
+  dpkg-reconfigure debconf --frontend=noninteractive
   sudo apt-get update
-  DEBIAN_FRONTEND=noninteractive sudo apt-get install -y build-essential cmake curl gettext ninja-build
+  sudo apt-get install -y build-essential cmake curl gettext ninja-build
 
   if [[ $CC == clang ]]; then
     DEFAULT_CLANG_VERSION=$(echo |  clang -dM -E - | grep __clang_major | awk '{print $3}')
