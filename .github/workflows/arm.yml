@@ -36,7 +36,7 @@ jobs:
             "
             ls
             "
-      - run: pwd
+      - run: make
       # - uses: actions/checkout@v3
       #   with:
       #     repository: 'neovim/neovim'
