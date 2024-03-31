@@ -1,0 +1,104 @@
+name: arm
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  ASAN_OPTIONS: detect_leaks=1:check_initialization_order=1:log_path=${{ github.workspace }}/build/log/asan:intercept_tls_get_addr=0
+  BIN_DIR: ${{ github.workspace }}/bin
+  BUILD_DIR: ${{ github.workspace }}/build
+  INSTALL_PREFIX: ${{ github.workspace }}/nvim-install
+  LOG_DIR: ${{ github.workspace }}/build/log
+  NVIM_LOG_FILE: ${{ github.workspace }}/build/.nvimlog
+  TSAN_OPTIONS: log_path=${{ github.workspace }}/build/log/tsan
+  VALGRIND_LOG: ${{ github.workspace }}/build/log/valgrind-%p.log
+  # TEST_FILE: test/functional/core/startup_spec.lua
+  # TEST_FILTER: foo
+
+jobs:
+  linux:
+    runs-on: ubuntu-20.04
+    env:
+      CC: clang
+    outputs:
+      version: ${{ steps.build.outputs.version }}
+    container:
+      image: docker://multiarch/ubuntu-core:s390x-focal
+      # options: --privileged # Privileged mode is needed to load fuse module.
+    steps:
+      - run: uname -a
+      # - name: Prepare container
+      #   run: |
+      #     apt-get update
+      #     apt-get install -y software-properties-common
+      #     add-apt-repository -y ppa:ubuntu-toolchain-r/test # For gcc-10.
+      #     add-apt-repository -y ppa:git-core/ppa # For git>=2.18.
+      #     apt-get update
+      #     apt-get install -y git gcc-10
+      #     apt-get install -y fuse libfuse2 # For linuxdeploy.
+      #     # Workaround for https://github.com/actions/checkout/issues/766.
+      #     git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      # - uses: actions/checkout@v3
+      #   with:
+      #     repository: 'neovim/neovim'
+      #     fetch-depth: 0
+      # - run: |
+      #    apt-get update
+      #    apt-get install -y build-essential curl gettext ninja-build unzip
+      #
+      # - name: Add "$BIN_DIR" to path
+      #   run: echo "$BIN_DIR" >> $GITHUB_PATH
+      #
+      # # TODO(dundargoc): this is very hacky. We only need to install cmake version
+      # # that is at least the minimum cmake version, but for some reason the
+      # # cmake releases didn't work as described.
+      # - name: Install cmake
+      #   run: |
+      #     apt-get install -y cmake # Install cmake only for cpack, the cmake version itself is too old
+      #     curl --retry 5 --silent --show-error --fail -o /tmp/cmake-installer.sh "https://cmake.org/files/v${MINIMUM_CMAKE_VERSION}/cmake-${MINIMUM_CMAKE_VERSION}.0-linux-x86_64.sh"
+      #     mkdir -p "$BIN_DIR" /opt/cmake-custom
+      #     chmod a+x /tmp/cmake-installer.sh
+      #     /tmp/cmake-installer.sh --prefix=/opt/cmake-custom --skip-license
+      #     ln -sfn /opt/cmake-custom/bin/cmake "$BIN_DIR/cmake"
+      #     cmake_version="$(cmake --version | head -1)"
+      #     echo "$cmake_version" | grep -qF "cmake version $MINIMUM_CMAKE_VERSION.0" || {
+      #       echo "Unexpected CMake version: $cmake_version"
+      #       exit 1
+      #     }
+      #
+      # - if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.tag_name != 'nightly')
+      #   run: |
+      #     echo 'CMAKE_BUILD_TYPE=Release' >> $GITHUB_ENV
+      #     echo 'APPIMAGE_TAG=latest' >> $GITHUB_ENV
+      # - if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.tag_name == 'nightly')
+      #   run: |
+      #     echo 'CMAKE_BUILD_TYPE=RelWithDebInfo' >> $GITHUB_ENV
+      #     echo 'APPIMAGE_TAG=nightly' >> $GITHUB_ENV
+      # - name: appimage
+      #   run: ./scripts/genappimage.sh ${APPIMAGE_TAG}
+      # - run: cpack --config build/CPackConfig.cmake
+      # - uses: actions/upload-artifact@v3
+      #   with:
+      #     name: appimage
+      #     path: |
+      #       build/bin/nvim.appimage
+      #       build/bin/nvim.appimage.zsync
+      #     retention-days: 1
+      # - uses: actions/upload-artifact@v3
+      #   with:
+      #     name: nvim-linux64
+      #     path: |
+      #       build/nvim-linux64.tar.gz
+      #       build/nvim-linux64.deb
+      #     retention-days: 1
+      # - name: Export version
+      #   id: build
+      #   run: |
+      #     printf 'version<<END\n' >> $GITHUB_OUTPUT
+      #     ./build/bin/nvim --version | head -n 3 >> $GITHUB_OUTPUT
+      #     printf 'END\n' >> $GITHUB_OUTPUT
