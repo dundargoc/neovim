@@ -25,10 +25,18 @@ jobs:
     runs-on: ubuntu-20.04
     env:
       CC: clang
-    container:
-      image: multiarch/ubuntu-core:arm64-focal
-      # options: --privileged # Privileged mode is needed to load fuse module.
     steps:
+      - run: docker run --rm --privileged multiarch/qemu-user-static:register --reset
+      - uses: docker://multiarch/ubuntu-core:s390x-focal
+        with:
+          # Docker runs the command as root, but we want the build/test to run
+          # as non-root so permissions based tests run correctly
+          args: >
+            bash -c
+            "
+            ls
+            "
+      - run: ls
       # - uses: actions/checkout@v3
       #   with:
       #     repository: 'neovim/neovim'
