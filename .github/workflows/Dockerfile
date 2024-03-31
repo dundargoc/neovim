@@ -3,7 +3,7 @@ ARG TAG
 
 COPY . /app
 WORKDIR app
-RUN ls
+RUN .github/scripts/install_deps.sh
 
 # RUN apt-get update && apt-get install -y git
 # RUN git clone --depth=1 https://github.com/neovim/neovim.git home/neovim
