@@ -26,7 +26,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: docker buildx create --use
-      - run: docker buildx build --platform linux/arm64 .github/workflows
+      - run: docker buildx build --platform linux/arm64 -t arm .github/workflows
+      - run: docker cp arm:flerp .
 
       - run: ls
       # - uses: docker://ubuntu:latest
