@@ -25,17 +25,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: docker run --rm --privileged --platform=linux/arm64 ubuntu:latest bash -c 'ls'
-      - uses: docker://ubuntu:latest
-        with:
-          args: >
-            bash -c
-            "
-            apt-get -y update && apt-get -y install sudo &&
-            .github/scripts/install_deps.sh &&
-            ./scripts/genappimage.sh nightly
-            "
-      - run: ls build
+      - run: docker buildx build --platform linux/arm64 .github/workflows
+      # - uses: docker://ubuntu:latest
+      #   with:
+      #     args: >
+      #       bash -c
+      #       "
+      #       apt-get -y update && apt-get -y install sudo &&
+      #       .github/scripts/install_deps.sh &&
+      #       ./scripts/genappimage.sh nightly
+      #       "
+      # - run: ls build
       # - uses: actions/checkout@v3
       #   with:
       #     repository: 'neovim/neovim'
