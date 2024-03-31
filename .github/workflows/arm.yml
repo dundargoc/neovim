@@ -30,12 +30,9 @@ jobs:
       - run: docker run --rm --privileged multiarch/qemu-user-static:register --reset
       - uses: docker://multiarch/ubuntu-core:s390x-focal
         with:
-          args: >
-            bash -c
-            "
-            apt-get update -y
-            apt-get install -y make
-            "
+          args:
+            - 'apt-get update -y'
+            - 'apt-get install -y make'
       # - run: s
       # - uses: actions/checkout@v3
       #   with:
