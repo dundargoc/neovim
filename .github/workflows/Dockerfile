@@ -1,8 +1,7 @@
 FROM ubuntu:latest as builder
 ARG TAG
 
-COPY ../.. /app
-RUN ls
+COPY ../../ /app
 RUN ls app
 
 # RUN apt-get update && apt-get install -y git
