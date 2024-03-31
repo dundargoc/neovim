@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: docker buildx create --use --bootstrap
+      - run: docker buildx create --use
       - run: docker buildx build --platform linux/arm64 .github/workflows
       # - uses: docker://ubuntu:latest
       #   with:

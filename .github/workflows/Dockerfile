@@ -1,4 +1,4 @@
 FROM ubuntu:latest
 
-WORKDIR /
+# WORKDIR /
 RUN ls
