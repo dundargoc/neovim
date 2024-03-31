@@ -22,11 +22,11 @@ env:
 
 jobs:
   linux:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: docker run --rm --privileged multiarch/qemu-user-static:register --reset
-      - uses: docker://multiarch/ubuntu-core:arm64-focal
+      - run: docker run --rm --privileged --platform=linux/arm64 multiarch/qemu-user-static:register --reset
+      - uses: ubuntu:latest
         with:
           args: >
             bash -c
