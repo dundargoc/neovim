@@ -1,7 +1,7 @@
 FROM ubuntu:latest as builder
 ARG TAG
 
-COPY . /app
+COPY ../.. /app
 RUN ls
 RUN ls app
 
