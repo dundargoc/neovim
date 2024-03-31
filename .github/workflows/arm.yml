@@ -28,14 +28,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: docker run --rm --privileged multiarch/qemu-user-static:register --reset
-      - uses: docker://multiarch/ubuntu-core:arm64-focal
+      - uses: docker://multiarch/ubuntu-core:s390x-focal
         with:
           args: >
             bash -c
             "
-            ls
+            make
             "
-      - run: ls
+      # - run: s
       # - uses: actions/checkout@v3
       #   with:
       #     repository: 'neovim/neovim'
