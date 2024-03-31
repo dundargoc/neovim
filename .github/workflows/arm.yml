@@ -31,8 +31,8 @@ jobs:
       - uses: docker://multiarch/ubuntu-core:s390x-focal
         with:
           args: |
-            - "apt-get update -y"
-            - "apt-get install -y make"
+            "apt-get update -y"
+            "apt-get install -y make"
       # - run: s
       # - uses: actions/checkout@v3
       #   with:
