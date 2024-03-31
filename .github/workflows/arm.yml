@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: docker run --rm --privileged --platform=linux/arm64 ubuntu:latest
+      - run: docker run --rm --privileged --platform=linux/arm64 ubuntu:latest bash -c 'ls'
       - uses: docker://ubuntu:latest
         with:
           args: >
