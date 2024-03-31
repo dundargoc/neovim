@@ -33,6 +33,7 @@ jobs:
           args: >
             bash -c
             "
+            apt-get -y install sudo &&
             .github/scripts/install_deps.sh &&
             DEBIAN_FRONTEND=noninteractive apt-get -y install build-essential cmake curl gettext ninja-build &&
             ./scripts/genappimage.sh nightly
