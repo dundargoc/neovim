@@ -1,4 +1,4 @@
-FROM alpine:3.19
+FROM ubuntu:latest
 
 WORKDIR /
 RUN ls
