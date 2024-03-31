@@ -28,13 +28,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: docker run --rm --privileged multiarch/qemu-user-static:register --reset
-      - run: sudo apt-get install -y make
       - uses: docker://multiarch/ubuntu-core:s390x-focal
         with:
           args: >
             bash -c
             "
-            make
+            apt-get install -y make
             "
       # - run: s
       # - uses: actions/checkout@v3
