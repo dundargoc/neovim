@@ -40,16 +40,16 @@ export VERSION
 cd "$APP_BUILD_DIR" || exit
 
 # Only downloads linuxdeploy if the remote file is different from local
-if [ -e "$APP_BUILD_DIR"/linuxdeploy-x86_64.AppImage ]; then
-  curl -Lo "$APP_BUILD_DIR"/linuxdeploy-x86_64.AppImage \
-    -z "$APP_BUILD_DIR"/linuxdeploy-x86_64.AppImage \
-    https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage  
+if [ -e "$APP_BUILD_DIR"/linuxdeploy-aarch64.AppImage ]; then
+  curl -Lo "$APP_BUILD_DIR"/linuxdeploy-aarch64.AppImage \
+    -z "$APP_BUILD_DIR"/linuxdeploy-aarch64.AppImage \
+    https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-aarch64.AppImage
 else
-  curl -Lo "$APP_BUILD_DIR"/linuxdeploy-x86_64.AppImage \
-    https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+  curl -Lo "$APP_BUILD_DIR"/linuxdeploy-aarch64.AppImage \
+    https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-aarch64.AppImage
 fi
 
-chmod +x "$APP_BUILD_DIR"/linuxdeploy-x86_64.AppImage
+chmod +x "$APP_BUILD_DIR"/linuxdeploy-aarch64.AppImage
 
 # metainfo is not packaged automatically by linuxdeploy
 mkdir -p "$APP_DIR/usr/share/metainfo/"
@@ -87,7 +87,7 @@ fi
 #   - Expects: $ARCH, $APP, $VERSION env vars
 #   - Expects: ./$APP.AppDir/ directory
 #   - Produces: ./nvim.appimage
-./linuxdeploy-x86_64.AppImage --appdir $APP.AppDir -d "$ROOT_DIR"/runtime/nvim.desktop -i \
+./linuxdeploy-aarch64.AppImage --appdir $APP.AppDir -d "$ROOT_DIR"/runtime/nvim.desktop -i \
 "$ROOT_DIR/runtime/nvim.png" --output appimage
 
 # Moving the final executable to a different folder so it isn't in the

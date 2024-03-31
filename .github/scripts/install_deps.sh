@@ -12,7 +12,7 @@ done
 os=$(uname -s)
 if [[ $os == Linux ]]; then
   sudo apt-get update
-  sudo apt-get install -y build-essential cmake curl gettext ninja-build
+  sudo DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential cmake curl gettext ninja-build git
 
   if [[ $CC == clang ]]; then
     DEFAULT_CLANG_VERSION=$(echo |  clang -dM -E - | grep __clang_major | awk '{print $3}')
