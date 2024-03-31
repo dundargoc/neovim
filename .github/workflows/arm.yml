@@ -31,6 +31,10 @@ jobs:
       image: multiarch/ubuntu-core:s390x-focal
       # options: --privileged # Privileged mode is needed to load fuse module.
     steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: 'neovim/neovim'
+          fetch-depth: 0
       - run: ls
       # - name: Prepare container
       #   run: |
