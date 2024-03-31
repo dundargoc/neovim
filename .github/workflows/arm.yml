@@ -26,7 +26,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: docker buildx create --use
-      - run: docker buildx build --platform linux/arm64 --build-arg="TAG=${{ github.ref }}" --output flerp .github/workflows
+      - run: docker buildx build --platform linux/arm64 --build-arg="TAG=${{ github.ref }}" --output flerp -f .github/workflows .
       - run: ls
       # - uses: docker://ubuntu:latest
       #   with:
