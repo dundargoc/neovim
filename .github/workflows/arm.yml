@@ -37,7 +37,7 @@ jobs:
             DEBIAN_FRONTEND=noninteractive apt-get -y install build-essential cmake curl gettext ninja-build locales-all cpanminus git attr libattr1-dev  &&
             runuser -u qemuci -- cmake -S cmake.deps -B .deps -G Ninja -D USE_BUNDLED_LUAJIT=OFF -D USE_BUNDLED_LUA=ON &&
             runuser -u qemuci -- cmake --build .deps &&
-            runuser -u qemuci -- cmake -B build -G Ninja -D CI_BUILD=ON -D PREFER_LUA=ON &&
+            runuser -u qemuci -- cmake -B build -G Ninja -D CI_BUILD=ON -D PREFER_LUA=ON
             "
       - run: ls
       # - uses: actions/checkout@v3
