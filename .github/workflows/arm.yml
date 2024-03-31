@@ -36,12 +36,11 @@ jobs:
             "
             ls
             "
-      - run: ls
+      - run: pwd
       # - uses: actions/checkout@v3
       #   with:
       #     repository: 'neovim/neovim'
       #     fetch-depth: 0
-      - run: ls
       # - name: Prepare container
       #   run: |
       #     apt-get update
