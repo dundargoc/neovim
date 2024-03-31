@@ -25,16 +25,14 @@ jobs:
     runs-on: ubuntu-20.04
     env:
       CC: clang
-    outputs:
-      version: ${{ steps.build.outputs.version }}
     container:
-      image: multiarch/ubuntu-core:s390x-focal
+      image: ubuntu:18.04
       # options: --privileged # Privileged mode is needed to load fuse module.
     steps:
-      - uses: actions/checkout@v3
-        with:
-          repository: 'neovim/neovim'
-          fetch-depth: 0
+      # - uses: actions/checkout@v3
+      #   with:
+      #     repository: 'neovim/neovim'
+      #     fetch-depth: 0
       - run: ls
       # - name: Prepare container
       #   run: |
