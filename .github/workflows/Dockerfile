@@ -1,4 +1,4 @@
 FROM ubuntu:latest
 
-# WORKDIR /
+RUN touch flerp
 RUN ls
