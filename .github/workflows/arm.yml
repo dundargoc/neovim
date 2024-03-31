@@ -26,14 +26,10 @@ jobs:
     env:
       CC: clang
     steps:
-      - uses: actions/checkout@v3
-        # with:
-        #   repository: 'neovim/neovim'
+      - uses: actions/checkout@v4
       - run: docker run --rm --privileged multiarch/qemu-user-static:register --reset
-      - uses: docker://multiarch/ubuntu-core:s390x-focal
+      - uses: docker://multiarch/ubuntu-core:arm64-focal
         with:
-          # Docker runs the command as root, but we want the build/test to run
-          # as non-root so permissions based tests run correctly
           args: >
             bash -c
             "
