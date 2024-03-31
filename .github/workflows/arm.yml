@@ -26,7 +26,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: docker run --rm --privileged --platform=linux/arm64 multiarch/qemu-user-static:register --reset
-      - uses: ubuntu:latest
+      - uses: docker://ubuntu:latest
         with:
           args: >
             bash -c
