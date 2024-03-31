@@ -23,6 +23,8 @@ env:
 jobs:
   linux:
     runs-on: ubuntu-20.04
+    env:
+      CC: clang
     steps:
       - uses: actions/checkout@v4
       - run: docker run --rm --privileged multiarch/qemu-user-static:register --reset
@@ -31,7 +33,7 @@ jobs:
           args: >
             bash -c
             "
-            apt-get -y update &&
+            .github/scripts/install_deps.sh &&
             DEBIAN_FRONTEND=noninteractive apt-get -y install build-essential cmake curl gettext ninja-build &&
             ./scripts/genappimage.sh nightly
             "
