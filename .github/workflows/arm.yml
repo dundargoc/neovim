@@ -33,6 +33,7 @@ jobs:
           args: >
             bash -c
             "
+            apt-get update -y
             apt-get install -y make
             "
       # - run: s
