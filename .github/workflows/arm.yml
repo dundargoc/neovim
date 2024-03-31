@@ -23,8 +23,6 @@ env:
 jobs:
   linux:
     runs-on: ubuntu-20.04
-    env:
-      CC: clang
     steps:
       - uses: actions/checkout@v4
       - run: docker run --rm --privileged multiarch/qemu-user-static:register --reset
