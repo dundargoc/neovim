@@ -11,7 +11,7 @@ done
 
 os=$(uname -s)
 if [[ $os == Linux ]]; then
-  dpkg-reconfigure debconf --frontend=noninteractive
+  sudo dpkg-reconfigure debconf --frontend=noninteractive
   sudo apt-get update
   sudo apt-get install -y build-essential cmake curl gettext ninja-build
 
