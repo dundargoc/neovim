@@ -1064,4 +1064,9 @@ function vim._defer_require(root, mod)
   })
 end
 
+function vim._has_executable(bin)
+  -- dirs = vim.split(vim.env.PATH, ':'); for dir in dirs do vim.fs.find(executable, {path='dir'}) should do the trick
+  -- then vim.uv.fs_stat on the foun
+end
+
 return vim
