@@ -24,7 +24,7 @@ jobs:
               "detect_merge_method": true
             }
 
-      - if: ${{steps.backport.outputs.was_successful == "true"}}
+      - if: ${{steps.backport.outputs.was_successful == 'true'}}
         uses: actions/github-script@v7
         with:
           script: |
