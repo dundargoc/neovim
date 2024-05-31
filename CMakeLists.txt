@@ -303,6 +303,11 @@ if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
   add_subdirectory(cmake.packaging)
 endif()
 
+option(USE_BUNDLED_TS_PARSERS "Use the bundled treesitter parsers." ON)
+if(USE_BUNDLED_TS_PARSERS)
+  include(BuildTreesitterParsers)
+endif()
+
 get_externalproject_options(uncrustify ${DEPS_IGNORE_SHA})
 ExternalProject_Add(uncrustify
   DOWNLOAD_DIR ${DEPS_DOWNLOAD_DIR}/uncrustify

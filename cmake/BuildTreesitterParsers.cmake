@@ -25,6 +25,7 @@ function(BuildTSParser)
       ${DEPS_BUILD_DIR}/src/${NAME}/CMakeLists.txt
     CMAKE_ARGS ${DEPS_CMAKE_ARGS}
       -D PARSERLANG=${TS_LANG}
+      -D CMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}
     ${EXTERNALPROJECT_OPTIONS})
 endfunction()
 

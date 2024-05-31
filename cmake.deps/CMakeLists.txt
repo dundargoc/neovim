@@ -35,7 +35,6 @@ option(USE_BUNDLED_LUAJIT "Use the bundled version of luajit." ${USE_BUNDLED})
 option(USE_BUNDLED_LUV "Use the bundled version of luv." ${USE_BUNDLED})
 option(USE_BUNDLED_MSGPACK "Use the bundled msgpack." ${USE_BUNDLED})
 option(USE_BUNDLED_TS "Use the bundled treesitter runtime." ${USE_BUNDLED})
-option(USE_BUNDLED_TS_PARSERS "Use the bundled treesitter parsers." ${USE_BUNDLED})
 option(USE_BUNDLED_UNIBILIUM "Use the bundled unibilium." ${USE_BUNDLED})
 if(USE_BUNDLED AND MSVC)
   option(USE_BUNDLED_GETTEXT "Use the bundled version of gettext." ON)
@@ -130,10 +129,6 @@ endif()
 
 if(USE_BUNDLED_LIBICONV)
   include(BuildLibiconv)
-endif()
-
-if(USE_BUNDLED_TS_PARSERS)
-  include(BuildTreesitterParsers)
 endif()
 
 if(USE_BUNDLED_TS)
