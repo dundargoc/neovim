@@ -129,13 +129,6 @@ local build_convert_table = function(ut_fp, props, cond_func, nl_index, table_na
   ut_fp:write('};\n')
 end
 
-local build_case_table = function(ut_fp, dataprops, table_name, index)
-  local cond_func = function(p)
-    return p[index] ~= ''
-  end
-  return build_convert_table(ut_fp, dataprops, cond_func, index, 'to' .. table_name)
-end
-
 local build_fold_table = function(ut_fp, foldprops)
   local cond_func = function(p)
     return (p[2] == 'C' or p[2] == 'S')
@@ -296,8 +289,6 @@ ud_fp:close()
 
 local ut_fp = io.open(utf_tables_fname, 'w')
 
-build_case_table(ut_fp, dataprops, 'Lower', 14)
-build_case_table(ut_fp, dataprops, 'Upper', 13)
 build_combining_table(ut_fp, dataprops)
 
 local cf_fp = io.open(casefolding_fname, 'r')
