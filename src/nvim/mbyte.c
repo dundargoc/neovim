@@ -1284,32 +1284,6 @@ bool utf_ambiguous_width(int c)
                        || intable(emoji_all, ARRAY_SIZE(emoji_all), c));
 }
 
-// Generic conversion function for case operations.
-// Return the converted equivalent of "a", which is a UCS-4 character.  Use
-// the given conversion "table".  Uses binary search on "table".
-static int utf_convert(int a, const convertStruct *const table, size_t n_items)
-{
-  // indices into table
-  size_t start = 0;
-  size_t end = n_items;
-  while (start < end) {
-    // need to search further
-    size_t mid = (end + start) / 2;
-    if (table[mid].rangeEnd < a) {
-      start = mid + 1;
-    } else {
-      end = mid;
-    }
-  }
-  if (start < n_items
-      && table[start].rangeStart <= a
-      && a <= table[start].rangeEnd
-      && (a - table[start].rangeStart) % table[start].step == 0) {
-    return a + table[start].offset;
-  }
-  return a;
-}
-
 // Return the folded-case equivalent of "a", which is a UCS-4 character.  Uses
 // simple case folding.
 int utf_fold(int a)
@@ -1318,7 +1292,29 @@ int utf_fold(int a)
     // be fast for ASCII
     return a >= 0x41 && a <= 0x5a ? a + 32 : a;
   }
-  return utf_convert(a, foldCase, ARRAY_SIZE(foldCase));
+
+  // HACK(dundargoc): utf8proc have trouble distinguishing between "simple" and "full"
+  // case folding.
+  //
+  // ß -> ss is only valid for full case folding.
+  // İ -> i̇ is only valid for full case folding.
+
+  if (a == 0xdf || a == 0x130) {
+    return a;
+  }
+
+  utf8proc_uint8_t input_str[16] = { 0 };
+  utf8proc_encode_char(a, input_str);
+
+  utf8proc_uint8_t *fold_str_utf;
+  utf8proc_map((utf8proc_uint8_t *)input_str, 0, &fold_str_utf,
+               UTF8PROC_NULLTERM | UTF8PROC_CASEFOLD);
+
+  int fold_codepoint_utf = utf_ptr2char((char *)fold_str_utf);
+
+  xfree(fold_str_utf);
+
+  return fold_codepoint_utf;
 }
 
 // Vim's own character class functions.  These exist because many library
