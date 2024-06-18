@@ -842,7 +842,6 @@ add_glob_target(
   -clang-analyzer-core.UndefinedBinaryOperatorResult,
   -clang-analyzer-core.uninitialized.Assign,
   -clang-analyzer-optin.performance.Padding,
-  -clang-analyzer-security.insecureAPI.strcpy,
   ${CLANG_ANALYZER_IGNORE}
   '
   EXCLUDE ${EXCLUDE_CLANG_TIDY})
