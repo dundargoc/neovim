@@ -22,6 +22,8 @@ elseif(APPLE)
   target_link_options(nlua0 PRIVATE -undefined dynamic_lookup)
 endif()
 
+target_link_options(nvim_bin PRIVATE "-Wl,-no_deduplicate")
+
 # TODO(dundargoc): unittest stops working if I create an pseudo-imported
 # library "luv" as with the other dependencies. Figure out why and fix.
 find_package(Luv 1.43.0 REQUIRED)
