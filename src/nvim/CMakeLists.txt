@@ -160,6 +160,7 @@ elseif(CMAKE_SYSTEM_NAME MATCHES "Darwin")
   # ENABLE_EXPORTS is set to true. See
   # https://github.com/neovim/neovim/issues/25295
   target_link_options(nvim_bin PRIVATE "-Wl,-export_dynamic")
+  target_compile_options(main_lib INTERFACE -mllvm -enable-constraint-elimination=0)
 elseif(CMAKE_SYSTEM_NAME MATCHES "OpenBSD")
   target_link_libraries(main_lib INTERFACE pthread c++abi)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
