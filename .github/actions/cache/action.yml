@@ -31,3 +31,9 @@ runs:
         key: ${{ env.CACHE_KEY }}-${{ steps.image.outputs.version }}-${{ hashFiles('cmake**',
           '.github/**', 'CMakeLists.txt',
           'runtime/CMakeLists.txt', 'src/nvim/**/CMakeLists.txt') }}
+
+    - run: echo ${{ hashFiles('cmake**') }}
+      shell: bash
+
+    - run: exit 1
+      shell: bash
