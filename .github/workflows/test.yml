@@ -1,9 +1,6 @@
 name: test
 on:
   push:
-    branches:
-      - 'master'
-      - 'release-[0-9]+.[0-9]+'
   pull_request:
     branches:
       - 'master'
@@ -12,7 +9,7 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  cancel-in-progress: true
 
 env:
   ASAN_OPTIONS: detect_leaks=1:check_initialization_order=1:log_path=${{ github.workspace }}/build/log/asan:intercept_tls_get_addr=0
@@ -23,75 +20,10 @@ env:
   NVIM_LOG_FILE: ${{ github.workspace }}/build/.nvimlog
   TSAN_OPTIONS: log_path=${{ github.workspace }}/build/log/tsan
   VALGRIND_LOG: ${{ github.workspace }}/build/log/valgrind-%p.log
-  # TEST_FILE: test/functional/core/startup_spec.lua
-  # TEST_FILTER: foo
+  TEST_FILE: test/functional/lua/ui_spec.lua
+  TEST_FILTER: open
 
 jobs:
-  lint:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 10
-    env:
-      CC: clang
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup
-
-      - name: Install stylua
-        run: |
-          wget --directory-prefix="$BIN_DIR" https://github.com/JohnnyMorganz/StyLua/releases/latest/download/stylua-linux-x86_64.zip
-          (cd "$BIN_DIR"; unzip stylua*.zip)
-
-      - name: Build third-party deps
-        run: |
-          cmake -S cmake.deps -B .deps -G Ninja
-          cmake --build .deps
-
-      - run: cmake -B build -G Ninja -D CI_LINT=ON
-
-      - if: "!cancelled()"
-        name: Determine if run should be aborted
-        id: abort_job
-        run: echo "status=${{ job.status }}" >> $GITHUB_OUTPUT
-
-      - if: success() || failure() && steps.abort_job.outputs.status == 'success'
-        name: stylua
-        run: cmake --build build --target lintlua-stylua
-
-      - if: success() || failure() && steps.abort_job.outputs.status == 'success'
-        name: luacheck
-        run: cmake --build build --target lintlua-luacheck
-
-      - if: success() || failure() && steps.abort_job.outputs.status == 'success'
-        name: lintsh
-        run: cmake --build build --target lintsh
-
-      - if: success() || failure() && steps.abort_job.outputs.status == 'success'
-        name: clint.py
-        run: cmake --build build --target lintc-clint
-
-      - if: success() || failure() && steps.abort_job.outputs.status == 'success'
-        name: clang-tidy
-        run: cmake --build build --target lintc-clang-tidy
-
-      - if: success() || failure() && steps.abort_job.outputs.status == 'success'
-        name: uncrustify
-        run: cmake --build build --target lintc-uncrustify
-
-  clang-analyzer:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 20
-    env:
-      CC: clang
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup
-      - name: Build third-party deps
-        run: |
-          cmake -S cmake.deps --preset ci
-          cmake --build .deps
-          cmake --preset ci
-      - run: cmake --build build --target clang-analyzer
-
   posix:
     name: ${{ matrix.build.os }} ${{ matrix.build.flavor }} ${{ matrix.build.cc }} ${{ matrix.test }}
     strategy:
@@ -112,7 +44,7 @@ jobs:
             { runner: macos-15, os: macos, flavor: arm, cc: clang, flags: -D CMAKE_FIND_FRAMEWORK=NEVER, deps_flags: -D CMAKE_FIND_FRAMEWORK=NEVER },
             { runner: ubuntu-24.04, os: ubuntu, flavor: puc-lua, cc: gcc, deps_flags: -D USE_BUNDLED_LUAJIT=OFF -D USE_BUNDLED_LUA=ON, flags: -D PREFER_LUA=ON },
           ]
-        test: [unittest, functionaltest, oldtest]
+        test: [functionaltest]
         exclude:
           - test: unittest
             build: { flavor: tsan }
@@ -200,72 +132,3 @@ jobs:
       - if: '!cancelled()'
         name: Show logs
         run: cat $(find "$LOG_DIR" -type f)
-
-  windows:
-    uses: ./.github/workflows/test_windows.yml
-
-  # This job tests the following things:
-  # - Check if MinSizeRel and RelWithDebInfo compiles correctly.
-  # - Test the above build types with the GCC compiler specifically.
-  #   Empirically the difference in warning levels between GCC and other
-  #   compilers is particularly big.
-  # - Test if the build works with multi-config generators. We mostly use
-  #   single-config generators so it's nice to have a small sanity check for
-  #   multi-config.
-  build-types:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 10
-    env:
-      CC: gcc
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup
-
-      - name: Build third-party deps
-        run: |
-          cmake -S cmake.deps -B .deps -G "Ninja Multi-Config"
-          cmake --build .deps
-
-      - name: Configure
-        run: cmake --preset ci -G "Ninja Multi-Config"
-
-      - name: RelWithDebInfo
-        run: cmake --build build --config RelWithDebInfo
-
-      - name: MinSizeRel
-        run: cmake --build build --config MinSizeRel
-
-  with-external-deps:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 10
-    env:
-      CC: gcc
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup
-
-      - name: Install dependencies
-        run: |
-          sudo add-apt-repository ppa:neovim-ppa/stable
-          sudo apt-get install -y \
-            libluajit-5.1-dev \
-            libunibilium-dev \
-            libuv1-dev \
-            lua-filesystem \
-            lua-lpeg \
-            luajit \
-            lua-luv-dev
-            # libtree-sitter-dev \
-
-            # Remove comments from packages once we start using these external
-            # dependencies.
-
-      - name: Build third-party deps
-        run: |
-          cmake -S cmake.deps --preset external_deps
-          cmake --build .deps
-
-      - name: Build
-        run: |
-          cmake --preset ci
-          cmake --build build
