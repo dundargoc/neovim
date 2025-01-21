@@ -266,6 +266,7 @@ function M.find(names, opts)
   vim.validate('type', opts.type, 'string', true)
   vim.validate('limit', opts.limit, 'number', true)
   vim.validate('follow', opts.follow, 'boolean', true)
+  -- vim.validate('dfs', opts.dfs, 'boolean', false)
 
   if type(names) == 'string' then
     names = { names }

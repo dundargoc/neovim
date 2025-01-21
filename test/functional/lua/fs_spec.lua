@@ -217,7 +217,11 @@ describe('vim.fs', function()
 
       eq(exp, run('testd', 999))
 
-      vim.uv.fs_symlink(vim.uv.fs_realpath('testd/a'), 'testd/l', { junction = true, dir = true })
+      vim.uv.fs_symlink(
+        assert(vim.uv.fs_realpath('testd/a')),
+        'testd/l',
+        { junction = true, dir = true }
+      )
       lexp['l'] = 'link'
       eq(lexp, run('testd', 2, nil, false))
 
@@ -230,8 +234,8 @@ describe('vim.fs', function()
 
     it('follow=true handles symlink loop', function()
       local cwd = 'testd/a/b/c'
-      local symlink = cwd .. '/link_loop' ---@type string
-      vim.uv.fs_symlink(vim.uv.fs_realpath(cwd), symlink, { junction = true, dir = true })
+      local symlink = cwd .. '/link_loop'
+      vim.uv.fs_symlink(assert(vim.uv.fs_realpath(cwd)), symlink, { junction = true, dir = true })
 
       eq(
         link_limit,
@@ -255,8 +259,8 @@ describe('vim.fs', function()
     end)
 
     it('follows symlinks', function()
-      local build_dir = test_source_path .. '/build' ---@type string
-      local symlink = test_source_path .. '/build_link' ---@type string
+      local build_dir = test_source_path .. '/build'
+      local symlink = test_source_path .. '/build_link'
       vim.uv.fs_symlink(build_dir, symlink, { junction = true, dir = true })
 
       finally(function()
@@ -285,8 +289,8 @@ describe('vim.fs', function()
     end)
 
     it('follow=true handles symlink loop', function()
-      local cwd = test_source_path ---@type string
-      local symlink = test_source_path .. '/loop_link' ---@type string
+      local cwd = test_source_path
+      local symlink = test_source_path .. '/loop_link'
       vim.uv.fs_symlink(cwd, symlink, { junction = true, dir = true })
 
       finally(function()
