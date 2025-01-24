@@ -38,14 +38,14 @@ end
 -- Executes and returns the output of `cmd`, or nil on failure.
 -- if die_on_fail is true, process dies with die_msg on failure
 local function _run(cmd, die_on_fail, die_msg)
-  local rv = vim.trim(vim.system(cmd, { text = true }):wait().stdout) or ''
-  if vim.v.shell_error ~= 0 then
+  local rv = vim.system(cmd):wait()
+  if rv.code ~= 0 then
     if die_on_fail then
       die(die_msg)
     end
     return nil
   end
-  return rv
+  return vim.trim(rv.stdout)
 end
 
 -- Run a command, return nil on failure
@@ -70,9 +70,8 @@ local function get_archive_info(repo, ref)
   local archive_path = temp_dir .. '/' .. archive_name
   local archive_url = 'https://github.com/' .. repo .. '/archive/' .. archive_name
 
-  vim.fs.rm(archive_path, { force = true })
   run_die(
-    { 'curl', '-sL', archive_url, '-o', archive_path },
+    { 'curl', '-sfL', archive_url, '-o', archive_path },
     'Failed to download archive from GitHub'
   )
 
