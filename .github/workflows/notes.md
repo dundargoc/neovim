@@ -54,7 +54,7 @@ glibc 2.31 or newer is required. Or you may try the (unsupported) [builds for ol
 2. Extract: `tar xzvf nvim-linux-x86_64.tar.gz`
 3. Run `./nvim-linux-x86_64/bin/nvim`
 
-### Linux (arm64)
+### Linux (arm64) - Untested
 
 #### AppImage
 
